@@ -50,9 +50,13 @@ export class ProductService {
 
   private initializeDummyData(models: any[]): void {
     if (isPlatformBrowser(this.platformId) && this.productsSubject.value.length === 0) {
-      console.log('Creating dummy products...');
+      console.log('Creating sample products for Klasik Hasır...');
+      console.log('Available models:', models.length, models);
       
       if (models.length > 0) {
+        const modelId = models[0]?.id;
+        console.log('Using model ID:', modelId);
+        
         const klasikHasirProducts: CreateProductDto[] = [
           // Klasik Hasır - 22 Ayar
           { modelId: models[0]?.id || '', ayar: 22, sira: 5, birimCmTel: 0.70, kesilenParca: 0.8, digerAgirliklar: 9.4, iscilik: 250 },
