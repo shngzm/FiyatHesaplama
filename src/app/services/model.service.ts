@@ -36,6 +36,7 @@ export class ModelService {
 
   private initializeDummyData(): void {
     if (isPlatformBrowser(this.platformId) && this.modelsSubject.value.length === 0) {
+      console.log('Initializing dummy models...');
       const dummyModels: CreateModelDto[] = [
         { modelTipi: 'Trabzon Hasır 1mm', kesimTipi: 'Dinamik', pay: 10 },
         { modelTipi: 'Trabzon Hasır 1.5mm', kesimTipi: 'Dinamik', pay: 15 },
@@ -45,6 +46,7 @@ export class ModelService {
       ];
       
       dummyModels.forEach(dto => this.create(dto));
+      console.log('Dummy models initialized:', this.modelsSubject.value.length);
     }
   }
 

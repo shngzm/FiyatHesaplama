@@ -39,13 +39,18 @@ export class ProductService {
       })
     );
     
-    // Initialize with dummy data if empty
-    setTimeout(() => this.initializeDummyData(), 100);
+    // Initialize with dummy data after models are loaded
+    this.modelService.models$.subscribe(models => {
+      if (models.length > 0 && this.productsSubject.value.length === 0) {
+        console.log('Models loaded, initializing dummy products for', models.length, 'models');
+        this.initializeDummyData(models);
+      }
+    });
   }
 
-  private initializeDummyData(): void {
+  private initializeDummyData(models: any[]): void {
     if (isPlatformBrowser(this.platformId) && this.productsSubject.value.length === 0) {
-      const models = this.modelService['modelsSubject'].value;
+      console.log('Creating dummy products...');
       
       if (models.length > 0) {
         const dummyProducts: CreateProductDto[] = [
@@ -79,6 +84,7 @@ export class ProductService {
             }
           }
         });
+        console.log('Dummy products initialized:', this.productsSubject.value.length);
       }
     }
   }
