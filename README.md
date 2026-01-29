@@ -5,21 +5,44 @@
   
   ### Trabzon Hasırı Gram Hesaplama Uygulaması
   
-  Modern Angular tabanlı kuyum ürünleri gram hesaplama ve yönetim uygulaması. Model ve ürün parametrelerine göre otomatik gram hesaplaması, Excel tabanlı veri yönetimi ve admin paneli sunar.
+  Modern Angular tabanlı kuyum ürünleri gram hesaplama ve yönetim uygulaması. Model ve ürün parametrelerine göre otomatik gram hesaplaması, LocalStorage tabanlı veri yönetimi ve admin paneli sunar.
+  
+  🌐 **[Web'den Kullan](https://[username].github.io/fiyathesaplama)** - Herhangi bir kurulum gerektirmez!
   
 </div>
 
 ## 🚀 Özellikler
 
+- ✅ **Web'den Erişim:** Tarayıcıdan direkt kullanım, indirme gerektirmez
+- ✅ **Desktop Uygulamaları:** Mac (Apple Silicon & Intel) için offline kullanım
 - ✅ Otomatik gram hesaplama (formül bazlı)
 - ✅ Model yönetimi (Dinamik/Statik kesim tipleri)
 - ✅ Ürün yönetimi (toplu ekleme, inline editing)
 - ✅ Admin paneli (şifre korumalı)
-- ✅ Excel import/export
+- ✅ LocalStorage veri saklama
 - ✅ Hesaplama geçmişi (son 5 kayıt)
 - ✅ Responsive tasarım
 - ✅ TypeScript ile tip güvenliği
 - ✅ Reactive Forms kullanımı
+
+## 🌐 Web Versiyonu (Önerilen)
+
+**Hızlı Erişim:** https://[username].github.io/fiyathesaplama
+
+### Avantajlar:
+- ✅ Kurulum gerektirmez
+- ✅ Tüm cihazlarda çalışır (Mac, Windows, iPad, iPhone)
+- ✅ Otomatik güncellenir
+- ✅ Güvenlik uyarısı yok
+- ✅ Veriler tarayıcıda güvenle saklanır
+
+## 💻 Desktop Uygulamaları
+
+Offline kullanım için:
+- **EliziGramFiyat.dmg** - Apple Silicon (M1/M2/M3)
+- **EliziGramFiyat-Intel.dmg** - Intel Mac
+
+Kurulum talimatları için `EliziGramFiyat-Kullanim.txt` dosyasına bakın.
 
 ## 📋 Gereksinimler
 
