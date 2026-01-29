@@ -139,6 +139,7 @@ export class ProductService {
     const products = this.productsSubject.value.filter(
       p => p.modelId === modelId && p.ayar === ayar
     );
+    console.log('getSirasForModelAndAyar:', { modelId, ayar, products: products.length, allProducts: this.productsSubject.value.length });
     const siras = [...new Set(products.map(p => p.sira))];
     return siras.sort((a, b) => a - b);
   }

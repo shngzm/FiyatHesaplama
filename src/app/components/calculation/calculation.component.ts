@@ -89,6 +89,7 @@ export class CalculationComponent implements OnInit, OnDestroy {
   }
 
   onModelChange(modelId: string): void {
+    console.log('Model changed to:', modelId);
     if (!modelId) {
       this.ayars = [];
       this.siras = [];
@@ -97,6 +98,7 @@ export class CalculationComponent implements OnInit, OnDestroy {
     }
 
     this.ayars = this.productService.getAyarsForModel(modelId);
+    console.log('Available ayars:', this.ayars);
     this.siras = [];
     this.calculationForm.patchValue({ ayar: '', sira: '' });
 
@@ -107,6 +109,7 @@ export class CalculationComponent implements OnInit, OnDestroy {
 
   onAyarChange(ayar: Ayar | null): void {
     const modelId = this.calculationForm.get('modelId')?.value;
+    console.log('Ayar changed to:', ayar, 'for model:', modelId);
     
     if (!modelId || !ayar) {
       this.siras = [];
@@ -115,6 +118,7 @@ export class CalculationComponent implements OnInit, OnDestroy {
     }
 
     this.siras = this.productService.getSirasForModelAndAyar(modelId, ayar);
+    console.log('Available siras:', this.siras);
     this.calculationForm.patchValue({ sira: '' });
 
     if (this.siras.length === 1) {
