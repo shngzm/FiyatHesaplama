@@ -136,9 +136,17 @@ export class CalculationComponent implements OnInit, OnDestroy {
 
     try {
       const input = this.calculationForm.value;
+      // Convert string values to numbers
+      const calculationInput = {
+        modelId: input.modelId,
+        ayar: typeof input.ayar === 'string' ? parseInt(input.ayar, 10) : input.ayar,
+        sira: typeof input.sira === 'string' ? parseInt(input.sira, 10) : input.sira,
+        uzunluk: typeof input.uzunluk === 'string' ? parseFloat(input.uzunluk) : input.uzunluk
+      };
+      console.log('Calculation input:', calculationInput);
       this.isLoadingPrice = true;
       
-      this.calculationService.calculateWithPrice(input)
+      this.calculationService.calculateWithPrice(calculationInput)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: (result) => {

@@ -120,9 +120,18 @@ export class ProductService {
   }
 
   getByModelAyarSira(modelId: string, ayar: Ayar, sira: number): Product | undefined {
-    return this.productsSubject.value.find(
-      p => p.modelId === modelId && p.ayar === ayar && p.sira === sira
+    console.log('getByModelAyarSira called with:', { modelId, ayar, ayarType: typeof ayar, sira, siraType: typeof sira });
+    const result = this.productsSubject.value.find(
+      p => {
+        const match = p.modelId === modelId && p.ayar === ayar && p.sira === sira;
+        if (!match) {
+          console.log('Product not matching:', { pModelId: p.modelId, pAyar: p.ayar, pAyarType: typeof p.ayar, pSira: p.sira, pSiraType: typeof p.sira });
+        }
+        return match;
+      }
     );
+    console.log('getByModelAyarSira result:', result ? 'Found' : 'Not found');
+    return result;
   }
 
   getByModel(modelId: string): Product[] {
