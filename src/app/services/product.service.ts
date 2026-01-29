@@ -38,6 +38,49 @@ export class ProductService {
         });
       })
     );
+    
+    // Initialize with dummy data if empty
+    setTimeout(() => this.initializeDummyData(), 100);
+  }
+
+  private initializeDummyData(): void {
+    if (isPlatformBrowser(this.platformId) && this.productsSubject.value.length === 0) {
+      const models = this.modelService['modelsSubject'].value;
+      
+      if (models.length > 0) {
+        const dummyProducts: CreateProductDto[] = [
+          // Trabzon Hasır 1mm products
+          { modelId: models[0]?.id || '', ayar: 14, sira: 1, birimCmTel: 0.15, kesilenParca: 2, digerAgirliklar: 0.05, iscilik: 250 },
+          { modelId: models[0]?.id || '', ayar: 22, sira: 1, birimCmTel: 0.18, kesilenParca: 2, digerAgirliklar: 0.06, iscilik: 300 },
+          
+          // Trabzon Hasır 1.5mm products
+          { modelId: models[1]?.id || '', ayar: 14, sira: 1, birimCmTel: 0.20, kesilenParca: 2.5, digerAgirliklar: 0.07, iscilik: 280 },
+          { modelId: models[1]?.id || '', ayar: 22, sira: 1, birimCmTel: 0.23, kesilenParca: 2.5, digerAgirliklar: 0.08, iscilik: 320 },
+          
+          // Trabzon Hasır 2mm products
+          { modelId: models[2]?.id || '', ayar: 14, sira: 1, birimCmTel: 0.25, kesilenParca: 3, digerAgirliklar: 0.10, iscilik: 300 },
+          { modelId: models[2]?.id || '', ayar: 22, sira: 1, birimCmTel: 0.28, kesilenParca: 3, digerAgirliklar: 0.12, iscilik: 350 },
+          
+          // Zincir Model A products
+          { modelId: models[3]?.id || '', ayar: 14, sira: 1, birimCmTel: 0.30, kesilenParca: 3.5, digerAgirliklar: 0.15, iscilik: 320 },
+          { modelId: models[3]?.id || '', ayar: 22, sira: 1, birimCmTel: 0.35, kesilenParca: 3.5, digerAgirliklar: 0.18, iscilik: 380 },
+          
+          // Zincir Model B products
+          { modelId: models[4]?.id || '', ayar: 14, sira: 1, birimCmTel: 0.35, kesilenParca: 4, digerAgirliklar: 0.20, iscilik: 350 },
+          { modelId: models[4]?.id || '', ayar: 22, sira: 1, birimCmTel: 0.40, kesilenParca: 4, digerAgirliklar: 0.25, iscilik: 400 },
+        ];
+
+        dummyProducts.forEach(dto => {
+          if (dto.modelId) {
+            try {
+              this.create(dto);
+            } catch (error) {
+              console.log('Dummy product already exists, skipping');
+            }
+          }
+        });
+      }
+    }
   }
 
   private loadFromStorage(): void {

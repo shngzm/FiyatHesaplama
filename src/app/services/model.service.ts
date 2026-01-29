@@ -13,6 +13,7 @@ export class ModelService {
 
   constructor(@Inject(PLATFORM_ID) private platformId: Object) {
     this.loadFromStorage();
+    this.initializeDummyData();
   }
 
   private loadFromStorage(): void {
@@ -30,6 +31,20 @@ export class ModelService {
           console.error('Failed to load models from storage:', error);
         }
       }
+    }
+  }
+
+  private initializeDummyData(): void {
+    if (isPlatformBrowser(this.platformId) && this.modelsSubject.value.length === 0) {
+      const dummyModels: CreateModelDto[] = [
+        { modelTipi: 'Trabzon Hasır 1mm', kesimTipi: 'Dinamik', pay: 10 },
+        { modelTipi: 'Trabzon Hasır 1.5mm', kesimTipi: 'Dinamik', pay: 15 },
+        { modelTipi: 'Trabzon Hasır 2mm', kesimTipi: 'Dinamik', pay: 20 },
+        { modelTipi: 'Zincir Model A', kesimTipi: 'Statik', pay: 45 },
+        { modelTipi: 'Zincir Model B', kesimTipi: 'Statik', pay: 50 },
+      ];
+      
+      dummyModels.forEach(dto => this.create(dto));
     }
   }
 
