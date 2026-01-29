@@ -1,0 +1,136 @@
+<div class="scrap-calculator-container">
+  <div class="scrap-calculator-card">
+    <h2>💎 Bozma Fiyatı Hesaplama</h2>
+    <p class="description">Gram ve ayar bilgisi ile altın bozma fiyatını hızlıca hesaplayın</p>
+    
+    <!-- Gold Price Info -->
+    <div *ngIf="goldPrice" class="gold-price-info">
+      <div class="price-header">
+        <span class="price-label">💰 Altın Alış Kuru:</span>
+        <span class="price-value">{{ formatPrice(goldPrice.buying) }}/gram</span>
+        <button 
+          class="btn-refresh" 
+          (click)="refreshGoldPrice()" 
+          [disabled]="isLoadingPrice"
+          title="Kuru yenile">
+          🔄
+        </button>
+      </div>
+      <div class="price-timestamp">
+        {{ getCacheStatus() }}
+        <span class="mock-warning" *ngIf="!isRealApiData">⚠️ Demo veri</span>
+      </div>
+    </div>
+
+    <div class="calculator-form">
+      <div class="input-row">
+        <div class="form-group">
+          <label for="productType">Ürün Tipi</label>
+          <select id="productType" [(ngModel)]="productType" class="form-control">
+            <option value="elizi">Elizi Ürünü</option>
+            <option value="diger">Diğer Ürün</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="quickGram">Gram</label>
+          <input 
+            type="number" 
+            id="quickGram" 
+            [(ngModel)]="quickGram"
+            class="form-control"
+            placeholder="Örn: 10"
+            step="0.01"
+            min="0.01"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="quickAyar">Ayar</label>
+          <select id="quickAyar" [(ngModel)]="quickAyar" class="form-control">
+            <option [value]="14">14 ayar</option>
+            <option [value]="22">22 ayar</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="button-group">
+        <button 
+          type="button" 
+          class="btn btn-primary"
+          (click)="calculateQuickScrap()"
+          [disabled]="!quickGram || quickGram <= 0 || !goldPrice">
+          Bozma Fiyatını Hesapla
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="reset()">
+          Temizle
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="quickScrapResult" class="result-card">
+      <h3>Hesaplama Sonucu</h3>
+      <div class="result-details">
+        <div class="result-item">
+          <span class="label">Ürün Tipi:</span>
+          <span class="value">{{ quickScrapResult.productType === 'elizi' ? 'Elizi Ürünü' : 'Diğer Ürün' }}</span>
+        </div>
+        <div class="result-item">
+          <span class="label">Gram:</span>
+          <span class="value">{{ quickScrapResult.gram }} g</span>
+        </div>
+        <div class="result-item">
+          <span class="label">Ayar:</span>
+          <span class="value">{{ quickScrapResult.ayar }} ayar</span>
+        </div>
+        <div class="result-item">
+          <span class="label">Ayar Katsayısı:</span>
+          <span class="value">{{ quickScrapResult.katsayi }}</span>
+        </div>
+        <div class="result-item">
+          <span class="label">Altın Alış Fiyatı:</span>
+          <span class="value">{{ formatPrice(quickScrapResult.alisFiyat) }}/g</span>
+        </div>
+        <div class="result-total">
+          <span class="label">Bozma Fiyatı:</span>
+          <span class="value price">{{ formatPrice(quickScrapResult.toplamFiyat) }}</span>
+        </div>
+      </div>
+
+      <div class="formula-info">
+        <p><strong>Formül:</strong> Gram × Ayar Katsayısı × Altın Alış Fiyatı</p>
+        <p class="formula-detail">
+          {{ quickScrapResult.gram }} × {{ quickScrapResult.katsayi }} × {{ formatPrice(quickScrapResult.alisFiyat) }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Calculation History -->
+    <div *ngIf="calculationHistory.length > 0" class="history-section">
+      <div class="history-header">
+        <h3>📋 Son Hesaplamalar</h3>
+        <button type="button" class="btn-clear-history" (click)="clearHistory()" title="Geçmişi Temizle">
+          🗑️ Temizle
+        </button>
+      </div>
+      
+      <div class="history-list">
+        <div *ngFor="let item of calculationHistory; let i = index" class="history-item">
+          <div class="history-item-header">
+            <span class="history-index">#{{ i + 1 }}</span>
+            <span class="history-time">{{ formatDate(item.timestamp) }}</span>
+          </div>
+          <div class="history-item-details">
+            <span class="detail">
+              <strong>{{ item.productType === 'elizi' ? 'Elizi' : 'Diğer' }}</strong>
+            </span>
+            <span class="detail">{{ item.gram }}g</span>
+            <span class="detail">{{ item.ayar }} ayar</span>
+            <span class="detail">({{ item.katsayi }})</span>
+            <span class="detail price-highlight">{{ formatPrice(item.toplamFiyat) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

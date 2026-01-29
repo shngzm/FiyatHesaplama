@@ -1,0 +1,86 @@
+<div class="gold-price-management">
+  <div class="page-header">
+    <h2>⚡ Altın Kuru Yönetimi</h2>
+    <p class="description">Manuel olarak altın alış ve satış fiyatlarını belirleyin</p>
+  </div>
+
+  <!-- Mevcut Kur Bilgisi -->
+  <div class="current-price-card" *ngIf="currentPrice">
+    <h3>Aktif Kur</h3>
+    <div class="price-display">
+      <div class="price-item">
+        <span class="label">Alış:</span>
+        <span class="value">{{ formatPrice(currentPrice.buying) }}</span>
+      </div>
+      <div class="price-item">
+        <span class="label">Satış:</span>
+        <span class="value">{{ formatPrice(currentPrice.selling) }}</span>
+      </div>
+    </div>
+    <div class="price-meta">
+      <span class="timestamp">{{ formatDate(currentPrice.timestamp) }}</span>
+      <span class="badge" [class.manual]="hasManualPrice" [class.api]="!hasManualPrice">
+        {{ hasManualPrice ? '✓ Manuel' : '🌐 API / Demo' }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Manuel Kur Girişi -->
+  <div class="price-form-card">
+    <h3>Yeni Kur Belirle</h3>
+    <form [formGroup]="priceForm" (ngSubmit)="savePrice()">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="buying">Alış Fiyatı (TL/gram)</label>
+          <input
+            type="number"
+            id="buying"
+            formControlName="buying"
+            placeholder="Örn: 2845.50"
+            step="0.01"
+          />
+          <div class="error" *ngIf="priceForm.get('buying')?.invalid && priceForm.get('buying')?.touched">
+            Geçerli bir alış fiyatı girin
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="selling">Satış Fiyatı (TL/gram)</label>
+          <input
+            type="number"
+            id="selling"
+            formControlName="selling"
+            placeholder="Örn: 2850.75"
+            step="0.01"
+          />
+          <div class="error" *ngIf="priceForm.get('selling')?.invalid && priceForm.get('selling')?.touched">
+            Geçerli bir satış fiyatı girin
+          </div>
+        </div>
+      </div>
+
+      <div class="button-group">
+        <button type="submit" class="btn btn-primary" [disabled]="priceForm.invalid">
+          💾 Kaydet
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="clearManualPrice()" *ngIf="hasManualPrice">
+          🗑️ Manuel Kuru Sil
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="refreshFromApi()" *ngIf="!hasManualPrice">
+          🔄 API'den Yenile
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Bilgi Kutusu -->
+  <div class="info-box">
+    <h4>ℹ️ Bilgilendirme</h4>
+    <ul>
+      <li>Manuel kur belirlediğinizde, API'den gelen kurlar devre dışı kalır</li>
+      <li>Hesaplamalar belirlediğiniz manuel kuru kullanır</li>
+      <li>Manuel kuru silmek için "Manuel Kuru Sil" butonunu kullanın</li>
+      <li>API aktifken otomatik olarak 10 dakikada bir güncellenir</li>
+    </ul>
+  </div>
+</div>

@@ -1,0 +1,131 @@
+<div class="management-container">
+  <div class="management-header">
+    <h2>Ürün Yönetimi</h2>
+  </div>
+
+  <div class="form-card">
+    <h3>Yeni Ürün Ekle</h3>
+    <form [formGroup]="productForm" (ngSubmit)="onSubmit()">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="modelId">Model *</label>
+          <select id="modelId" formControlName="modelId" class="form-control">
+            <option value="">Seçiniz</option>
+            <option *ngFor="let model of models" [value]="model.id">{{ model.modelTipi }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="ayar">Ayar *</label>
+          <select id="ayar" formControlName="ayar" class="form-control">
+            <option value="">Seçiniz</option>
+            <option *ngFor="let ayar of ayarOptions" [value]="ayar">{{ ayar }} ayar</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="sira">Sıra *</label>
+          <select id="sira" formControlName="sira" class="form-control">
+            <option value="">Seçiniz</option>
+            <option *ngFor="let sira of siraOptions" [value]="sira">{{ sira }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="birimCmTel">1 cm Tel (g) *</label>
+          <input 
+            type="number" 
+            id="birimCmTel" 
+            formControlName="birimCmTel"
+            class="form-control"
+            placeholder="0.00"
+            step="0.01"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="kesilenParca">Kesilen Parça (g) *</label>
+          <input 
+            type="number" 
+            id="kesilenParca" 
+            formControlName="kesilenParca"
+            class="form-control"
+            placeholder="0.00"
+            step="0.01"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="digerAgirliklar">Diğer Ağırlıklar (g) *</label>
+          <input 
+            type="number" 
+            id="digerAgirliklar" 
+            formControlName="digerAgirliklar"
+            class="form-control"
+            placeholder="Toka, diş vb."
+            step="0.01"
+          >
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="iscilik">İşçilik (milyem) *</label>
+          <input 
+            type="number" 
+            id="iscilik" 
+            formControlName="iscilik"
+            class="form-control"
+            placeholder="Örn: 250"
+            step="1"
+          >
+          <small class="form-hint">Milyem cinsinden işçilik değeri (örn: 250)</small>
+        </div>
+
+        <div class="form-group form-actions">
+          <button type="submit" class="btn btn-primary" [disabled]="productForm.invalid">
+            ✅ Ürün Ekle
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="table-card">
+    <h3>Ürün Listesi</h3>
+    <table class="data-table" *ngIf="products.length > 0; else noProducts">
+      <thead>
+        <tr>
+          <th>Model</th>
+          <th>Ayar</th>
+          <th>Sıra</th>
+          <th>1 cm Tel</th>
+          <th>Kesilen</th>
+          <th>Diğer Ağ.</th>
+          <th>İşçilik</th>
+          <th>İşlemler</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let product of products">
+          <td>{{ product.modelTipi }}</td>
+          <td>{{ product.ayar }}</td>
+          <td>{{ product.sira }}</td>
+          <td>{{ product.birimCmTel | number:'1.2-2' }} g</td>
+          <td>{{ product.kesilenParca | number:'1.2-2' }} g</td>
+          <td>{{ product.digerAgirliklar | number:'1.2-2' }} g</td>
+          <td>{{ product.iscilik }} ‰</td>
+          <td>
+            <button class="btn btn-sm btn-danger" (click)="deleteProduct(product)">🗑️ Sil</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <ng-template #noProducts>
+      <p class="no-data">Henüz ürün eklenmemiş. Yukarıdaki formu kullanarak ürün ekleyebilirsiniz.</p>
+    </ng-template>
+  </div>
+</div>

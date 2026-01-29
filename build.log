@@ -1,0 +1,32 @@
+
+> gram-fiyat@1.0.0 dist:mac
+> npm run build:prod && electron-builder --mac
+
+
+> gram-fiyat@1.0.0 build:prod
+> ng build --configuration production --base-href ./
+
+- Building...
+
+Initial chunk files   | Names         |  Raw size | Estimated transfer size
+main-VYTODGUY.js      | main          | 368.22 kB |                87.64 kB
+polyfills-FFHMD2TL.js | polyfills     |  33.71 kB |                11.02 kB
+styles-KWKGRH2W.css   | styles        |   6.10 kB |                 1.56 kB
+
+                      | Initial total | 408.03 kB |               100.21 kB
+
+Output location: /Users/gizemesmer/Desktop/personal/fiyathesaplama/dist/fiyat-hesaplama
+
+Application bundle generation complete. [4.071 seconds]
+
+  • electron-builder  version=26.4.0 os=25.2.0
+  • loaded configuration  file=package.json ("build" field)
+  • author is missed in the package.json  appPackageFile=/Users/gizemesmer/Desktop/personal/fiyathesaplama/package.json
+  • @electron/rebuild already used by electron-builder, please consider to remove excess dependency from devDependencies
+
+To ensure your native dependencies are always matched electron version, simply add script `"postinstall": "electron-builder install-app-deps" to your `package.json`
+  • executing @electron/rebuild  electronVersion=27.3.11 arch=arm64 buildFromSource=false workspaceRoot=/Users/gizemesmer/Desktop/personal/fiyathesaplama projectDir=./ appDir=./
+  • installing native dependencies  arch=arm64
+  • completed installing native dependencies
+  • packaging       platform=darwin arch=arm64 electron=27.3.11 appOutDir=release/mac-arm64
+  ⨯ ENOENT: no such file or directory, rename '/Users/gizemesmer/Desktop/personal/fiyathesaplama/release/mac-arm64/Electron.app/Contents/MacOS/Electron' -> '/Users/gizemesmer/Desktop/personal/fiyathesaplama/release/mac-arm64/Electron.app/Contents/MacOS/GramFiyat'  failedTask=build stackTrace=Error: ENOENT: no such file or directory, rename '/Users/gizemesmer/Desktop/personal/fiyathesaplama/release/mac-arm64/Electron.app/Contents/MacOS/Electron' -> '/Users/gizemesmer/Desktop/personal/fiyathesaplama/release/mac-arm64/Electron.app/Contents/MacOS/GramFiyat'

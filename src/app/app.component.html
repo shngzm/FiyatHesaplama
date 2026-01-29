@@ -1,0 +1,71 @@
+<div class="app-container">
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-content">
+      <div class="logo-section" (click)="navigateTo('/')" (keypress)="navigateTo('/')" tabindex="0" role="button" aria-label="Ana sayfaya git">
+        <img src="assets/elizi-goldtool-logo.jpeg" alt="Gram/Fiyat Logo" class="logo">
+        <h1 class="app-title">Gram/Fiyat</h1>
+      </div>
+      
+      <button class="mobile-menu-toggle" (click)="toggleMobileMenu()" aria-label="Menüyü aç/kapat">
+        <span class="hamburger-icon">☰</span>
+      </button>
+      
+      <nav class="main-nav" [class.mobile-open]="mobileMenuOpen">
+        <div class="nav-links">
+          <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeMobileMenu()">
+            <span class="nav-icon">🏠</span>
+            <span class="nav-text">Ana Sayfa</span>
+          </a>
+          <a routerLink="/scrap-calculator" routerLinkActive="active" (click)="closeMobileMenu()">
+            <span class="nav-icon">💎</span>
+            <span class="nav-text">Bozma Fiyatı</span>
+          </a>
+          <a routerLink="/calculation" routerLinkActive="active" (click)="closeMobileMenu()">
+            <span class="nav-icon">🔢</span>
+            <span class="nav-text">Hesaplama</span>
+          </a>
+          <a routerLink="/admin/gold-price" routerLinkActive="active" (click)="closeMobileMenu()">
+            <span class="nav-icon">💰</span>
+            <span class="nav-text">Altın Kuru</span>
+          </a>
+        </div>
+        
+        <div class="nav-auth">
+          @if (isAuthenticated()) {
+            <a routerLink="/admin/models" routerLinkActive="active" (click)="closeMobileMenu()">
+              <span class="nav-icon">📋</span>
+              <span class="nav-text">Model</span>
+            </a>
+            <a routerLink="/admin/products" routerLinkActive="active" (click)="closeMobileMenu()">
+              <span class="nav-icon">📦</span>
+              <span class="nav-text">Ürün</span>
+            </a>
+            <button class="logout-btn" (click)="logout(); closeMobileMenu()">
+              <span class="nav-icon">🚪</span>
+              <span class="nav-text">Çıkış</span>
+            </button>
+          } @else {
+            <a routerLink="/admin/login" routerLinkActive="active" (click)="closeMobileMenu()">
+              <span class="nav-icon">🔐</span>
+              <span class="nav-text">Admin</span>
+            </a>
+          }
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="app-content">
+    <router-outlet />
+  </main>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <p>&copy; 2025 Gram/Fiyat. Tüm hakları saklıdır.</p>
+  </footer>
+</div>
+
+<!-- Notification Component -->
+<app-notification />

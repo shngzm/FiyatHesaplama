@@ -1,0 +1,158 @@
+<div class="calculation-container">
+  <div class="calculation-card">
+    <h2>Gram ve Fiyat Hesaplama</h2>
+    
+    <!-- Gold Price Info -->
+    <div *ngIf="goldPrice" class="gold-price-info">
+      <div class="price-header">
+        <span class="price-label">💰 Altın Kuru:</span>
+        <span class="price-value">{{ formatPrice(goldPrice.selling) }}/gram</span>
+        <button 
+          class="btn-refresh" 
+          (click)="refreshGoldPrice()" 
+          [disabled]="isLoadingPrice"
+          title="Kuru yenile">
+          🔄
+        </button>
+      </div>
+      <div class="price-timestamp">
+        {{ getCacheStatus() }}
+        <span class="mock-warning" *ngIf="!isRealApiData">⚠️ Demo veri</span>
+      </div>
+    </div>
+    
+    <form [formGroup]="calculationForm" (ngSubmit)="calculate()" class="calculation-form">
+      <div class="form-group">
+        <label for="model">Model</label>
+        <select id="model" formControlName="modelId" class="form-control">
+          <option value="">Seçiniz</option>
+          <option *ngFor="let model of models" [value]="model.id">{{ model.modelTipi }}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="ayar">Ayar</label>
+        <select id="ayar" formControlName="ayar" class="form-control" [disabled]="ayars.length === 0">
+          <option value="">Seçiniz</option>
+          <option *ngFor="let ayar of ayars" [value]="ayar">{{ ayar }} ayar</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="sira">Sıra</label>
+        <select id="sira" formControlName="sira" class="form-control" [disabled]="siras.length === 0">
+          <option value="">Seçiniz</option>
+          <option *ngFor="let sira of siras" [value]="sira">{{ sira }}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="uzunluk">Uzunluk (cm)</label>
+        <input 
+          type="number" 
+          id="uzunluk" 
+          formControlName="uzunluk"
+          class="form-control"
+          placeholder="Örn: 50"
+          step="0.01"
+        >
+      </div>
+
+      <div class="button-group">
+        <button type="submit" class="btn btn-primary" [disabled]="!canCalculate || isLoadingPrice">
+          {{ isLoadingPrice ? 'Hesaplanıyor...' : 'Gram ve Fiyat Hesapla' }}
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="reset()">
+          Yeni Hesaplama
+        </button>
+      </div>
+    </form>
+
+    <div *ngIf="result" class="result-card">
+      <h3>Sonuç</h3>
+      <div class="result-summary">
+        <div class="result-item">
+          <span class="result-label">Ağırlık:</span>
+          <span class="result-value">{{ result.sonuc }} gram</span>
+        </div>
+        <div class="result-item" *ngIf="result.fiyat">
+          <span class="result-label">Fiyat:</span>
+          <span class="result-value price">{{ formatPrice(result.fiyat) }}</span>
+        </div>
+        <div class="result-item" *ngIf="result.altinKuru">
+          <span class="result-label">Kullanılan Kur:</span>
+          <span class="result-value">{{ formatPrice(result.altinKuru) }}/gram</span>
+        </div>
+      </div>
+
+      <!-- Bozma Fiyatı Table -->
+      <div *ngIf="result.bozmaFiyati" class="bozma-fiyati-section">
+        <h4>Bozma Fiyatı</h4>
+        <div class="bozma-table">
+          <div class="bozma-row">
+            <span class="bozma-label">Ürün Gramı:</span>
+            <span class="bozma-value">{{ result.sonuc }} gram</span>
+          </div>
+          <div class="bozma-row">
+            <span class="bozma-label">Ayar Katsayısı:</span>
+            <span class="bozma-value">{{ calculationForm.get('ayar')?.value === 14 ? '0.585 (14 ayar)' : '0.916 (22 ayar)' }}</span>
+          </div>
+          <div class="bozma-row">
+            <span class="bozma-label">Altın Alış Fiyatı:</span>
+            <span class="bozma-value">{{ formatPrice(result.altinAlisKuru || 0) }}/gram</span>
+          </div>
+          <div class="bozma-row bozma-total">
+            <span class="bozma-label">Bozma Fiyatı:</span>
+            <span class="bozma-value price">{{ formatPrice(result.bozmaFiyati) }}</span>
+          </div>
+        </div>
+      </div>
+      
+      <button class="btn-toggle-breakdown" (click)="toggleBreakdown()" type="button">
+        {{ showBreakdown ? '▼' : '▶' }} Hesaplama Detayı
+      </button>
+      
+      <div *ngIf="showBreakdown" class="result-breakdown">
+        <p class="formula">{{ result.formula }}</p>
+        <ul class="breakdown-list">
+          <li>Uzunluk: {{ result.breakdown.uzunluk }} cm</li>
+          <li>Pay: {{ result.breakdown.pay }} cm</li>
+          <li>1 cm Tel: {{ result.breakdown.birimCmTel }} g</li>
+          <li>Diğer Ağırlıklar: {{ result.breakdown.digerAgirliklar }} g</li>
+          <li>Kesilen Parça: {{ result.breakdown.kesilenParca }} cm</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="history-card" *ngIf="history.length > 0">
+    <h3>Son Hesaplamalar</h3>
+    <table class="history-table">
+      <thead>
+        <tr>
+          <th>Model</th>
+          <th>Ayar</th>
+          <th>Sıra</th>
+          <th>Uzunluk</th>
+          <th>Gram</th>
+          <th>Fiyat</th>
+          <th>Tarih</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of history">
+          <td>{{ item.modelTipi }}</td>
+          <td>{{ item.ayar }}</td>
+          <td>{{ item.sira }}</td>
+          <td>{{ item.uzunluk }} cm</td>
+          <td>{{ item.sonuc }} g</td>
+          <td>
+            <span *ngIf="item.fiyat; else noPrice">{{ formatPrice(item.fiyat) }}</span>
+            <ng-template #noPrice>-</ng-template>
+          </td>
+          <td>{{ formatDate(item.calculatedAt) }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

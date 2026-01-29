@@ -1,0 +1,33 @@
+directories:
+  output: release
+  buildResources: build
+appId: com.elizi.gramfiyat
+productName: EliziGramFiyat
+asar: true
+asarUnpack:
+  - '**/*.node'
+files:
+  - filter:
+      - dist/**/*
+      - electron.js
+      - package.json
+      - src/assets/**/*
+      - '!dist/**/server'
+      - '!dist/**/server.mjs'
+      - '!dist/**/*.server.mjs'
+mac:
+  icon: src/assets/icon.png
+  target:
+    - target: dmg
+      arch: arm64
+  category: public.app-category.business
+win:
+  icon: src/assets/icon.png
+  target:
+    - nsis
+    - portable
+linux:
+  target:
+    - AppImage
+    - deb
+electronVersion: 27.3.11

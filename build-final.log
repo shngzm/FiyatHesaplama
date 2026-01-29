@@ -1,0 +1,60 @@
+yarn run v1.22.22
+warning ../../../package.json: No license field
+$ npm run build:prod && electron-builder --mac
+
+> gram-fiyat@1.0.0 build:prod
+> ng build --configuration production --base-href ./
+
+- Building...
+
+Browser bundles        
+Initial chunk files     | Names               |  Raw size | Estimated transfer size
+main-DVQCKXC6.js        | main                | 775.86 kB |               203.85 kB
+polyfills-FFHMD2TL.js   | polyfills           |  33.71 kB |                11.02 kB
+styles-AQBJQJ2V.css     | styles              |   3.91 kB |                 1.13 kB
+
+                        | Initial total       | 813.48 kB |               216.00 kB
+
+
+Server bundles         
+Initial chunk files     | Names               |  Raw size
+server.mjs              | server              |   1.53 MB |                        
+chunk-J4DIOUCC.mjs      | -                   | 567.44 kB |                        
+chunk-KHLNS46V.mjs      | -                   | 522.95 kB |                        
+polyfills.server.mjs    | polyfills.server    | 262.30 kB |                        
+chunk-VVCT4QZE.mjs      | -                   |   2.48 kB |                        
+render-utils.server.mjs | render-utils.server |   1.44 kB |                        
+main.server.mjs         | main.server         | 149 bytes |                        
+
+Lazy chunk files        | Names               |  Raw size
+chunk-QZP2S7SI.mjs      | xhr2                |  11.79 kB |                        
+
+Prerendered 6 static routes.
+Output location: /Users/gizemesmer/Desktop/personal/fiyathesaplama/dist/fiyat-hesaplama
+
+Application bundle generation complete. [10.008 seconds]
+
+▲ [WARNING] bundle initial exceeded maximum budget. Budget 500.00 kB was not met by 313.48 kB with a total of 813.48 kB.
+
+
+▲ [WARNING] src/app/components/calculation/calculation.component.scss exceeded maximum budget. Budget 2.00 kB was not met by 1.63 kB with a total of 3.63 kB.
+
+
+▲ [WARNING] src/app/components/admin/gold-price-management/gold-price-management.component.scss exceeded maximum budget. Budget 2.00 kB was not met by 1020 bytes with a total of 3.00 kB.
+
+
+  • electron-builder  version=26.4.0 os=25.2.0
+  • loaded configuration  file=package.json ("build" field)
+  • author is missed in the package.json  appPackageFile=/Users/gizemesmer/Desktop/personal/fiyathesaplama/package.json
+  • @electron/rebuild already used by electron-builder, please consider to remove excess dependency from devDependencies
+
+To ensure your native dependencies are always matched electron version, simply add script `"postinstall": "electron-builder install-app-deps" to your `package.json`
+  • executing @electron/rebuild  electronVersion=28.0.0 arch=arm64 buildFromSource=false workspaceRoot=/Users/gizemesmer/Desktop/personal/fiyathesaplama projectDir=./ appDir=./
+  • installing native dependencies  arch=arm64
+  • completed installing native dependencies
+  • packaging       platform=darwin arch=arm64 electron=28.0.0 appOutDir=release/mac-arm64
+  • default Electron icon is used  reason=application icon is not set
+  • falling back to ad-hoc signature for macOS application code signing
+  • signing         file=release/mac-arm64/GramFiyat.app platform=darwin type=distribution identityName=- identityHash=none provisioningProfile=none
+  • skipped macOS notarization  reason=`notarize` options were unable to be generated
+  • building        target=DMG arch=arm64 file=release/GramFiyat-1.0.0-arm64.dmg
