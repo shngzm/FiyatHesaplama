@@ -40,7 +40,7 @@ export class ModelService {
       const sampleModel: CreateModelDto = { 
         modelTipi: 'Klasik Hasır', 
         kesimTipi: 'Dinamik', 
-        pay: 10 
+        pay: 0 
       };
       
       this.create(sampleModel);
