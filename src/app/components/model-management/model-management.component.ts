@@ -62,7 +62,14 @@ export class ModelManagementComponent implements OnInit, OnDestroy {
     }
 
     try {
-      const dto: CreateModelDto = this.modelForm.getRawValue();
+      const formValue = this.modelForm.getRawValue();
+      // Convert pay to number if it's a string
+      const dto: CreateModelDto = {
+        modelTipi: formValue.modelTipi,
+        kesimTipi: formValue.kesimTipi,
+        pay: typeof formValue.pay === 'string' ? parseFloat(formValue.pay) : formValue.pay
+      };
+      console.log('Creating model with:', dto);
       this.modelService.create(dto);
       this.notificationService.success('Model başarıyla eklendi');
       this.modelForm.reset({ kesimTipi: 'Dinamik', pay: 0 });

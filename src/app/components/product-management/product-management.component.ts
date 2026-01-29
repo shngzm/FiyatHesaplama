@@ -85,7 +85,18 @@ export class ProductManagementComponent implements OnInit, OnDestroy {
     }
 
     try {
-      const dto: CreateProductDto = this.productForm.getRawValue();
+      const formValue = this.productForm.getRawValue();
+      // Convert string values to proper types
+      const dto: CreateProductDto = {
+        modelId: formValue.modelId,
+        ayar: typeof formValue.ayar === 'string' ? parseInt(formValue.ayar, 10) : formValue.ayar,
+        sira: typeof formValue.sira === 'string' ? parseInt(formValue.sira, 10) : formValue.sira,
+        birimCmTel: typeof formValue.birimCmTel === 'string' ? parseFloat(formValue.birimCmTel) : formValue.birimCmTel,
+        kesilenParca: typeof formValue.kesilenParca === 'string' ? parseFloat(formValue.kesilenParca) : formValue.kesilenParca,
+        digerAgirliklar: typeof formValue.digerAgirliklar === 'string' ? parseFloat(formValue.digerAgirliklar) : formValue.digerAgirliklar,
+        iscilik: typeof formValue.iscilik === 'string' ? parseInt(formValue.iscilik, 10) : formValue.iscilik
+      };
+      console.log('Creating product with:', dto);
       this.productService.create(dto);
       this.notificationService.success('Ürün başarıyla eklendi');
       this.productForm.reset();
