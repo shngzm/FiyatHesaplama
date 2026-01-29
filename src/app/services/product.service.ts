@@ -53,29 +53,23 @@ export class ProductService {
       console.log('Creating dummy products...');
       
       if (models.length > 0) {
-        const dummyProducts: CreateProductDto[] = [
-          // Trabzon Hasır 1mm products
-          { modelId: models[0]?.id || '', ayar: 14, sira: 1, birimCmTel: 0.15, kesilenParca: 2, digerAgirliklar: 0.05, iscilik: 250 },
-          { modelId: models[0]?.id || '', ayar: 22, sira: 1, birimCmTel: 0.18, kesilenParca: 2, digerAgirliklar: 0.06, iscilik: 300 },
+        const klasikHasirProducts: CreateProductDto[] = [
+          // Klasik Hasır - 22 Ayar
+          { modelId: models[0]?.id || '', ayar: 22, sira: 5, birimCmTel: 0.70, kesilenParca: 0.8, digerAgirliklar: 9.4, iscilik: 250 },
+          { modelId: models[0]?.id || '', ayar: 22, sira: 7, birimCmTel: 1.11, kesilenParca: 0.8, digerAgirliklar: 12, iscilik: 250 },
+          { modelId: models[0]?.id || '', ayar: 22, sira: 9, birimCmTel: 1.40, kesilenParca: 0.8, digerAgirliklar: 11.7, iscilik: 250 },
+          { modelId: models[0]?.id || '', ayar: 22, sira: 11, birimCmTel: 1.75, kesilenParca: 0.8, digerAgirliklar: 14.4, iscilik: 250 },
+          { modelId: models[0]?.id || '', ayar: 22, sira: 13, birimCmTel: 2.19, kesilenParca: 0.8, digerAgirliklar: 16.2, iscilik: 250 },
           
-          // Trabzon Hasır 1.5mm products
-          { modelId: models[1]?.id || '', ayar: 14, sira: 1, birimCmTel: 0.20, kesilenParca: 2.5, digerAgirliklar: 0.07, iscilik: 280 },
-          { modelId: models[1]?.id || '', ayar: 22, sira: 1, birimCmTel: 0.23, kesilenParca: 2.5, digerAgirliklar: 0.08, iscilik: 320 },
-          
-          // Trabzon Hasır 2mm products
-          { modelId: models[2]?.id || '', ayar: 14, sira: 1, birimCmTel: 0.25, kesilenParca: 3, digerAgirliklar: 0.10, iscilik: 300 },
-          { modelId: models[2]?.id || '', ayar: 22, sira: 1, birimCmTel: 0.28, kesilenParca: 3, digerAgirliklar: 0.12, iscilik: 350 },
-          
-          // Zincir Model A products
-          { modelId: models[3]?.id || '', ayar: 14, sira: 1, birimCmTel: 0.30, kesilenParca: 3.5, digerAgirliklar: 0.15, iscilik: 320 },
-          { modelId: models[3]?.id || '', ayar: 22, sira: 1, birimCmTel: 0.35, kesilenParca: 3.5, digerAgirliklar: 0.18, iscilik: 380 },
-          
-          // Zincir Model B products
-          { modelId: models[4]?.id || '', ayar: 14, sira: 1, birimCmTel: 0.35, kesilenParca: 4, digerAgirliklar: 0.20, iscilik: 350 },
-          { modelId: models[4]?.id || '', ayar: 22, sira: 1, birimCmTel: 0.40, kesilenParca: 4, digerAgirliklar: 0.25, iscilik: 400 },
+          // Klasik Hasır - 14 Ayar
+          { modelId: models[0]?.id || '', ayar: 14, sira: 5, birimCmTel: 0.60, kesilenParca: 0.8, digerAgirliklar: 6.5, iscilik: 250 },
+          { modelId: models[0]?.id || '', ayar: 14, sira: 7, birimCmTel: 0.90, kesilenParca: 0.8, digerAgirliklar: 9.5, iscilik: 250 },
+          { modelId: models[0]?.id || '', ayar: 14, sira: 9, birimCmTel: 1.2, kesilenParca: 0.8, digerAgirliklar: 9.2, iscilik: 250 },
+          { modelId: models[0]?.id || '', ayar: 14, sira: 11, birimCmTel: 1.5, kesilenParca: 0.8, digerAgirliklar: 10.55, iscilik: 250 },
+          { modelId: models[0]?.id || '', ayar: 14, sira: 13, birimCmTel: 1.8, kesilenParca: 0.8, digerAgirliklar: 12, iscilik: 250 },
         ];
 
-        dummyProducts.forEach(dto => {
+        klasikHasirProducts.forEach(dto => {
           if (dto.modelId) {
             try {
               this.create(dto);

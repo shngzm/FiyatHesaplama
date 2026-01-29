@@ -36,17 +36,15 @@ export class ModelService {
 
   private initializeDummyData(): void {
     if (isPlatformBrowser(this.platformId) && this.modelsSubject.value.length === 0) {
-      console.log('Initializing dummy models...');
-      const dummyModels: CreateModelDto[] = [
-        { modelTipi: 'Trabzon Hasır 1mm', kesimTipi: 'Dinamik', pay: 10 },
-        { modelTipi: 'Trabzon Hasır 1.5mm', kesimTipi: 'Dinamik', pay: 15 },
-        { modelTipi: 'Trabzon Hasır 2mm', kesimTipi: 'Dinamik', pay: 20 },
-        { modelTipi: 'Zincir Model A', kesimTipi: 'Statik', pay: 45 },
-        { modelTipi: 'Zincir Model B', kesimTipi: 'Statik', pay: 50 },
-      ];
+      console.log('Initializing sample model...');
+      const sampleModel: CreateModelDto = { 
+        modelTipi: 'Klasik Hasır', 
+        kesimTipi: 'Dinamik', 
+        pay: 10 
+      };
       
-      dummyModels.forEach(dto => this.create(dto));
-      console.log('Dummy models initialized:', this.modelsSubject.value.length);
+      this.create(sampleModel);
+      console.log('Sample model initialized:', this.modelsSubject.value.length);
     }
   }
 
