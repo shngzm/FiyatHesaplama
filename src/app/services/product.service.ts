@@ -136,10 +136,18 @@ export class ProductService {
   }
 
   getSirasForModelAndAyar(modelId: string, ayar: Ayar): number[] {
-    const products = this.productsSubject.value.filter(
-      p => p.modelId === modelId && p.ayar === ayar
+    const allProducts = this.productsSubject.value;
+    console.log('All products:', allProducts);
+    console.log('Filtering for modelId:', modelId, 'ayar:', ayar, 'ayar type:', typeof ayar);
+    
+    const products = allProducts.filter(
+      p => {
+        const match = p.modelId === modelId && p.ayar === ayar;
+        console.log('Product:', { id: p.id, modelId: p.modelId, ayar: p.ayar, ayarType: typeof p.ayar, sira: p.sira, match });
+        return match;
+      }
     );
-    console.log('getSirasForModelAndAyar:', { modelId, ayar, products: products.length, allProducts: this.productsSubject.value.length });
+    console.log('getSirasForModelAndAyar:', { modelId, ayar, products: products.length, allProducts: allProducts.length });
     const siras = [...new Set(products.map(p => p.sira))];
     return siras.sort((a, b) => a - b);
   }
