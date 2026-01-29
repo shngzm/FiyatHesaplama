@@ -7,7 +7,7 @@ import { Model, CreateModelDto, UpdateModelDto } from '../models/model.model';
   providedIn: 'root'
 })
 export class ModelService {
-  private readonly STORAGE_KEY = 'elizi_goldtool_models';
+  private readonly STORAGE_KEY = 'elizi_goldtool_models_v2';
   private modelsSubject = new BehaviorSubject<Model[]>([]);
   public models$ = this.modelsSubject.asObservable();
 
