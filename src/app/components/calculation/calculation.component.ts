@@ -117,7 +117,9 @@ export class CalculationComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.siras = this.productService.getSirasForModelAndAyar(modelId, ayar);
+    // Convert ayar to number if it's a string
+    const ayarNumber = typeof ayar === 'string' ? parseInt(ayar, 10) : ayar;
+    this.siras = this.productService.getSirasForModelAndAyar(modelId, ayarNumber as Ayar);
     console.log('Available siras:', this.siras);
     this.calculationForm.patchValue({ sira: '' });
 
