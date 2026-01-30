@@ -35,6 +35,7 @@ export class GramPriceCalculatorComponent implements OnInit, OnDestroy {
   calculatedGram: number | null = null;
   calculatedAyarRatio: number | null = null;
   calculatedGoldPrice: number | null = null;
+  calculatedIscilik: number | null = null;
   calculatedPricePerGram: number | null = null;
   calculatedTotalPrice: number | null = null;
   
@@ -47,7 +48,8 @@ export class GramPriceCalculatorComponent implements OnInit, OnDestroy {
   ) {
     this.priceForm = this.fb.group({
       ayar: ['', Validators.required],
-      gram: ['', [Validators.required, Validators.min(0.01), Validators.max(10000)]]
+      gram: ['', [Validators.required, Validators.min(0.01), Validators.max(10000)]],
+      iscilik: [250, [Validators.required, Validators.min(0), Validators.max(1000)]]
     });
   }
 
@@ -93,8 +95,9 @@ export class GramPriceCalculatorComponent implements OnInit, OnDestroy {
 
     const ayar = parseInt(this.priceForm.value.ayar);
     const gram = parseFloat(this.priceForm.value.gram);
+    const iscilikMilyem = parseFloat(this.priceForm.value.iscilik) || 0;
 
-    console.log('Calculating price for:', { ayar, gram });
+    console.log('Calculating price for:', { ayar, gram, iscilikMilyem });
 
     // Ayar oranları (sabit değerler)
     const ayarRatios: { [key: number]: number } = {
@@ -108,8 +111,14 @@ export class GramPriceCalculatorComponent implements OnInit, OnDestroy {
 
     const ayarRatio = ayarRatios[ayar] || (ayar / 24);
     
-    // Gram başına fiyat
-    this.pricePerGram = this.goldPrice.selling * ayarRatio;
+    // İşçilik katsayısı (milyem / 1000)
+    const iscilikKatsayisi = iscilikMilyem / 1000;
+    
+    // Toplam katsayı (ayar + işçilik)
+    const toplamKatsayi = ayarRatio + iscilikKatsayisi;
+    
+    // Gram başına fiyat (işçilik dahil)
+    this.pricePerGram = this.goldPrice.selling * toplamKatsayi;
     
     // Toplam fiyat
     this.totalPrice = this.pricePerGram * gram;
@@ -119,6 +128,7 @@ export class GramPriceCalculatorComponent implements OnInit, OnDestroy {
     this.calculatedGram = gram;
     this.calculatedAyarRatio = ayarRatio;
     this.calculatedGoldPrice = this.goldPrice.selling;
+    this.calculatedIscilik = iscilikMilyem;
     this.calculatedPricePerGram = this.pricePerGram;
     this.calculatedTotalPrice = this.totalPrice;
 
@@ -131,13 +141,16 @@ export class GramPriceCalculatorComponent implements OnInit, OnDestroy {
   }
 
   reset(): void {
-    this.priceForm.reset();
+    this.priceForm.reset({
+      iscilik: 250  // Default işçilik değeri
+    });
     this.totalPrice = null;
     this.pricePerGram = null;
     this.calculatedAyar = null;
     this.calculatedGram = null;
     this.calculatedAyarRatio = null;
     this.calculatedGoldPrice = null;
+    this.calculatedIscilik = null;
     this.calculatedPricePerGram = null;
     this.calculatedTotalPrice = null;
   }

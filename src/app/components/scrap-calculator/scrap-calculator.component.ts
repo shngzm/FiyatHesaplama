@@ -134,10 +134,33 @@ export class ScrapCalculatorComponent implements OnInit, OnDestroy {
   }
 
   getKatsayi(): number {
+    // quickAyar değerini number'a çevir (select'ten string gelebilir)
+    const ayar = typeof this.quickAyar === 'string' ? parseInt(this.quickAyar, 10) : this.quickAyar;
+    
+    // Elizi ürünü için ayar katsayıları
+    const eliziKatsayilari: { [key: number]: number } = {
+      8: 0.333,
+      10: 0.417,
+      14: 0.585,
+      18: 0.750,
+      21: 0.875,
+      22: 0.916
+    };
+
+    // Diğer ürünler için ayar katsayıları (biraz daha düşük)
+    const digerKatsayilari: { [key: number]: number } = {
+      8: 0.330,
+      10: 0.415,
+      14: 0.575,
+      18: 0.745,
+      21: 0.870,
+      22: 0.912
+    };
+
     if (this.productType === 'elizi') {
-      return this.quickAyar === 14 ? 0.585 : 0.916;
+      return eliziKatsayilari[ayar] || (ayar / 24);
     } else {
-      return this.quickAyar === 14 ? 0.575 : 0.912;
+      return digerKatsayilari[ayar] || (ayar / 24);
     }
   }
 
