@@ -1,7 +1,7 @@
 <div class="gram-price-calculator-container">
   <div class="header">
-    <h1>� Bozma Fiyatı Hesaplama</h1>
-    <p class="subtitle">Gram ve ayar bilgisi ile altın bozma fiyatını hızlıca hesaplayın</p>
+    <h1>💰 Gramdan Satış Fiyatı Hesaplama</h1>
+    <p class="subtitle">Gram ve ayar bilgisi ile satış fiyatını hızlıca hesaplayın</p>
   </div>
 
   <!-- Gold Price Display -->
@@ -63,24 +63,24 @@
       <div class="result-breakdown">
         <div class="result-item">
           <span class="result-label">24 Ayar Altın Fiyatı:</span>
-          <span class="result-value">{{ goldPrice?.selling | number:'1.2-2' }} ₺/gr</span>
+          <span class="result-value">{{ calculatedGoldPrice | number:'1.2-2' }} ₺/gr</span>
         </div>
         <div class="result-item">
-          <span class="result-label">Ayar Katsayısı ({{ priceForm.value.ayar }} Ayar):</span>
-          <span class="result-value">{{ getAyarRatio() }}</span>
+          <span class="result-label">Ayar Katsayısı ({{ calculatedAyar }} Ayar):</span>
+          <span class="result-value">{{ calculatedAyarRatio }}</span>
         </div>
         <div class="result-item">
           <span class="result-label">Gram Başına Fiyat:</span>
-          <span class="result-value">{{ goldPrice?.selling | number:'1.2-2' }} × {{ getAyarRatio() }} = {{ pricePerGram | number:'1.2-2' }} ₺</span>
+          <span class="result-value">{{ calculatedGoldPrice | number:'1.2-2' }} × {{ calculatedAyarRatio }} = {{ pricePerGram | number:'1.2-2' }} ₺</span>
         </div>
         <div class="result-item">
           <span class="result-label">Toplam Gram:</span>
-          <span class="result-value">{{ priceForm.value.gram }} gr</span>
+          <span class="result-value">{{ calculatedGram }} gr</span>
         </div>
         <div class="result-divider"></div>
         <div class="result-item">
           <span class="result-label">Hesaplama:</span>
-          <span class="result-value">{{ pricePerGram | number:'1.2-2' }} × {{ priceForm.value.gram }} gr</span>
+          <span class="result-value">{{ pricePerGram | number:'1.2-2' }} × {{ calculatedGram }} gr</span>
         </div>
         <div class="result-item result-total">
           <span class="result-label">Toplam Satış Fiyatı:</span>

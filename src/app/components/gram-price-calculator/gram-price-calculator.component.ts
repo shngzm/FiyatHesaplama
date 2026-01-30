@@ -30,6 +30,12 @@ export class GramPriceCalculatorComponent implements OnInit, OnDestroy {
   totalPrice: number | null = null;
   pricePerGram: number | null = null;
   
+  // Calculated values (stored separately)
+  calculatedAyar: number | null = null;
+  calculatedGram: number | null = null;
+  calculatedAyarRatio: number | null = null;
+  calculatedGoldPrice: number | null = null;
+  
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -100,6 +106,12 @@ export class GramPriceCalculatorComponent implements OnInit, OnDestroy {
 
     const ayarRatio = ayarRatios[ayar] || (ayar / 24);
     
+    // Store calculated values
+    this.calculatedAyar = ayar;
+    this.calculatedGram = gram;
+    this.calculatedAyarRatio = ayarRatio;
+    this.calculatedGoldPrice = this.goldPrice.selling;
+    
     // Gram başına fiyat
     this.pricePerGram = this.goldPrice.selling * ayarRatio;
     
@@ -118,6 +130,10 @@ export class GramPriceCalculatorComponent implements OnInit, OnDestroy {
     this.priceForm.reset();
     this.totalPrice = null;
     this.pricePerGram = null;
+    this.calculatedAyar = null;
+    this.calculatedGram = null;
+    this.calculatedAyarRatio = null;
+    this.calculatedGoldPrice = null;
   }
 
   refreshGoldPrice(): void {
