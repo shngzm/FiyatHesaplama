@@ -5,6 +5,7 @@ import { ModelManagementComponent } from './components/model-management/model-ma
 import { ProductManagementComponent } from './components/product-management/product-management.component';
 import { CalculationComponent } from './components/calculation/calculation.component';
 import { ScrapCalculatorComponent } from './components/scrap-calculator/scrap-calculator.component';
+import { GramPriceCalculatorComponent } from './components/gram-price-calculator/gram-price-calculator.component';
 import { GoldPriceManagementComponent } from './components/admin/gold-price-management/gold-price-management.component';
 import { authGuard } from './guards/auth.guard';
 
@@ -12,6 +13,7 @@ export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'scrap-calculator', component: ScrapCalculatorComponent },
   { path: 'calculation', component: CalculationComponent },
+  { path: 'gram-price-calculator', component: GramPriceCalculatorComponent },
   { path: 'admin/login', component: AdminLoginComponent },
   { 
     path: 'admin/models', 

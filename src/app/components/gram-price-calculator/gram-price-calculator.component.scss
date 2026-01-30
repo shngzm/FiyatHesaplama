@@ -1,0 +1,313 @@
+.gram-price-calculator-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+
+  .header {
+    text-align: center;
+    margin-bottom: 2rem;
+
+    h1 {
+      font-size: 2rem;
+      color: #2c3e50;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      color: #7f8c8d;
+      font-size: 1rem;
+    }
+  }
+
+  // Gold Price Section
+  .gold-price-section {
+    margin-bottom: 2rem;
+
+    .price-card {
+      background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      text-align: center;
+
+      .price-label {
+        font-size: 0.9rem;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+      }
+
+      .price-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 0.75rem;
+      }
+
+      .price-meta {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        font-size: 0.85rem;
+
+        .update-time {
+          color: #34495e;
+        }
+
+        .data-badge {
+          padding: 0.25rem 0.75rem;
+          border-radius: 12px;
+          font-weight: 500;
+
+          &.real-data {
+            background: rgba(39, 174, 96, 0.2);
+            color: #27ae60;
+          }
+
+          &.demo-data {
+            background: rgba(241, 196, 15, 0.2);
+            color: #f39c12;
+          }
+        }
+      }
+
+      .btn-refresh {
+        background: rgba(255, 255, 255, 0.9);
+        color: #2c3e50;
+        border: none;
+        padding: 0.5rem 1rem;
+        
+        &:hover:not(:disabled) {
+          background: white;
+        }
+
+        &:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+      }
+    }
+  }
+
+  // Calculation Section
+  .calculation-section {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #2c3e50;
+      }
+
+      .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+
+        &:focus {
+          outline: none;
+          border-color: #3498db;
+          box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        &:invalid {
+          border-color: #e74c3c;
+        }
+      }
+
+      select.form-control {
+        cursor: pointer;
+      }
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+
+      .btn {
+        padding: 0.75rem 2rem;
+        font-size: 1rem;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 500;
+
+        &.btn-primary {
+          background: #3498db;
+          color: white;
+
+          &:hover:not(:disabled) {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+          }
+
+          &:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+          }
+        }
+
+        &.btn-secondary {
+          background: #95a5a6;
+          color: white;
+
+          &:hover {
+            background: #7f8c8d;
+          }
+        }
+      }
+    }
+  }
+
+  // Result Section
+  .result-section {
+    animation: slideIn 0.3s ease-out;
+
+    .result-card {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      border-left: 4px solid #27ae60;
+
+      h2 {
+        color: #2c3e50;
+        margin-bottom: 1.5rem;
+        font-size: 1.5rem;
+        text-align: center;
+      }
+
+      .result-breakdown {
+        .result-item {
+          display: flex;
+          justify-content: space-between;
+          padding: 1rem;
+          margin-bottom: 0.5rem;
+
+          .result-label {
+            color: #7f8c8d;
+            font-weight: 500;
+          }
+
+          .result-value {
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 1.1rem;
+          }
+
+          &.result-total {
+            background: #ecf0f1;
+            border-radius: 8px;
+            margin-top: 1rem;
+            padding: 1.5rem;
+
+            .result-label {
+              color: #2c3e50;
+              font-size: 1.1rem;
+            }
+
+            .total-price {
+              color: #27ae60;
+              font-size: 1.5rem;
+            }
+          }
+        }
+
+        .result-divider {
+          height: 1px;
+          background: #e0e0e0;
+          margin: 1rem 0;
+        }
+      }
+    }
+  }
+
+  // Back Section
+  .back-section {
+    text-align: center;
+    margin-top: 2rem;
+
+    .btn-outline {
+      background: transparent;
+      color: #3498db;
+      border: 2px solid #3498db;
+      padding: 0.75rem 2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: #3498db;
+        color: white;
+      }
+    }
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .gram-price-calculator-container {
+    padding: 1rem;
+
+    .header h1 {
+      font-size: 1.5rem;
+    }
+
+    .calculation-section {
+      padding: 1.5rem;
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-actions {
+        flex-direction: column;
+
+        .btn {
+          width: 100%;
+        }
+      }
+    }
+
+    .result-section .result-card {
+      padding: 1.5rem;
+
+      .result-breakdown .result-item {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+      }
+    }
+  }
+}

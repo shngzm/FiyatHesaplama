@@ -1,0 +1,96 @@
+<div class="gram-price-calculator-container">
+  <div class="header">
+    <h1>💰 Gram Fiyat Hesaplama</h1>
+    <p class="subtitle">Ayar ve gram bilgisi ile satış fiyatı hesaplama</p>
+  </div>
+
+  <!-- Gold Price Display -->
+  <div class="gold-price-section" *ngIf="goldPrice">
+    <div class="price-card">
+      <div class="price-label">Güncel Altın Fiyatı (24 Ayar)</div>
+      <div class="price-value">{{ goldPrice.selling | number:'1.2-2' }} ₺/gr</div>
+      <div class="price-meta">
+        <span class="update-time">{{ goldPrice.timestamp | date:'dd.MM.yyyy HH:mm' }}</span>
+        <span class="data-badge">
+          🟡 Demo Veri
+        </span>
+      </div>
+      <button class="btn btn-sm btn-refresh" (click)="refreshGoldPrice()" [disabled]="isLoadingPrice">
+        {{ isLoadingPrice ? '⏳ Yükleniyor...' : '🔄 Fiyatı Yenile' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Calculation Form -->
+  <div class="calculation-section">
+    <form [formGroup]="priceForm" (ngSubmit)="calculate()">
+      <div class="form-grid">
+        <!-- Ayar Selection -->
+        <div class="form-group">
+          <label for="ayar">Ayar *</label>
+          <select id="ayar" formControlName="ayar" class="form-control">
+            <option value="">Ayar Seçin</option>
+            <option *ngFor="let ayar of ayarOptions" [value]="ayar.value">
+              {{ ayar.label }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Gram Input -->
+        <div class="form-group">
+          <label for="gram">Gram *</label>
+          <input 
+            type="number" 
+            id="gram" 
+            formControlName="gram" 
+            class="form-control"
+            placeholder="Örn: 10.50"
+            step="0.01"
+            min="0.01"
+            max="10000"
+          >
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" [disabled]="priceForm.invalid || isLoadingPrice">
+          ⚖️ Hesapla
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="reset()">
+          🔄 Temizle
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Result Display -->
+  <div class="result-section" *ngIf="totalPrice !== null">
+    <div class="result-card">
+      <h2>📊 Hesaplama Sonucu</h2>
+      
+      <div class="result-breakdown">
+        <div class="result-item">
+          <span class="result-label">Gram Başına Fiyat ({{ priceForm.value.ayar }} Ayar):</span>
+          <span class="result-value">{{ pricePerGram | number:'1.2-2' }} ₺</span>
+        </div>
+        <div class="result-item">
+          <span class="result-label">Toplam Gram:</span>
+          <span class="result-value">{{ priceForm.value.gram }} gr</span>
+        </div>
+        <div class="result-divider"></div>
+        <div class="result-item result-total">
+          <span class="result-label">Toplam Satış Fiyatı:</span>
+          <span class="result-value total-price">{{ totalPrice | number:'1.2-2' }} ₺</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Back Button -->
+  <div class="back-section">
+    <button class="btn btn-outline" routerLink="/">
+      ← Ana Sayfaya Dön
+    </button>
+  </div>
+</div>
