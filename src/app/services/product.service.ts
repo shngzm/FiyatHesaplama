@@ -8,7 +8,7 @@ import { ModelService } from './model.service';
   providedIn: 'root'
 })
 export class ProductService {
-  private readonly STORAGE_KEY = 'elizi_goldtool_products_v4'; // v3 - tüm ayarları içeren versiyon
+  private readonly STORAGE_KEY = 'elizi_goldtool_products_v5'; // v3 - tüm ayarları içeren versiyon
   private productsSubject = new BehaviorSubject<Product[]>([]);
   public products$ = this.productsSubject.asObservable();
 
@@ -58,33 +58,12 @@ export class ProductService {
         console.log('Using model ID:', modelId);
         
         const klasikHasirProducts: CreateProductDto[] = [
-          // Klasik Hasır - 10 Ayar
-          { modelId: models[0]?.id || '', ayar: 10, sira: 5, birimCmTel: 0.50, kesilenParca: 0.8, digerAgirliklar: 5.5, iscilik: 250 },
-          { modelId: models[0]?.id || '', ayar: 10, sira: 7, birimCmTel: 0.75, kesilenParca: 0.8, digerAgirliklar: 8.0, iscilik: 250 },
-          { modelId: models[0]?.id || '', ayar: 10, sira: 9, birimCmTel: 1.0, kesilenParca: 0.8, digerAgirliklar: 7.8, iscilik: 250 },
-          { modelId: models[0]?.id || '', ayar: 10, sira: 11, birimCmTel: 1.25, kesilenParca: 0.8, digerAgirliklar: 8.9, iscilik: 250 },
-          { modelId: models[0]?.id || '', ayar: 10, sira: 13, birimCmTel: 1.50, kesilenParca: 0.8, digerAgirliklar: 10.0, iscilik: 250 },
-          
           // Klasik Hasır - 14 Ayar
           { modelId: models[0]?.id || '', ayar: 14, sira: 5, birimCmTel: 0.60, kesilenParca: 0.8, digerAgirliklar: 6.5, iscilik: 250 },
           { modelId: models[0]?.id || '', ayar: 14, sira: 7, birimCmTel: 0.90, kesilenParca: 0.8, digerAgirliklar: 9.5, iscilik: 250 },
           { modelId: models[0]?.id || '', ayar: 14, sira: 9, birimCmTel: 1.2, kesilenParca: 0.8, digerAgirliklar: 9.2, iscilik: 250 },
           { modelId: models[0]?.id || '', ayar: 14, sira: 11, birimCmTel: 1.5, kesilenParca: 0.8, digerAgirliklar: 10.55, iscilik: 250 },
           { modelId: models[0]?.id || '', ayar: 14, sira: 13, birimCmTel: 1.8, kesilenParca: 0.8, digerAgirliklar: 12, iscilik: 250 },
-          
-          // Klasik Hasır - 18 Ayar
-          { modelId: models[0]?.id || '', ayar: 18, sira: 5, birimCmTel: 0.65, kesilenParca: 0.8, digerAgirliklar: 8.0, iscilik: 250 },
-          { modelId: models[0]?.id || '', ayar: 18, sira: 7, birimCmTel: 1.00, kesilenParca: 0.8, digerAgirliklar: 11.0, iscilik: 250 },
-          { modelId: models[0]?.id || '', ayar: 18, sira: 9, birimCmTel: 1.30, kesilenParca: 0.8, digerAgirliklar: 10.5, iscilik: 250 },
-          { modelId: models[0]?.id || '', ayar: 18, sira: 11, birimCmTel: 1.60, kesilenParca: 0.8, digerAgirliklar: 12.5, iscilik: 250 },
-          { modelId: models[0]?.id || '', ayar: 18, sira: 13, birimCmTel: 2.00, kesilenParca: 0.8, digerAgirliklar: 14.0, iscilik: 250 },
-          
-          // Klasik Hasır - 21 Ayar
-          { modelId: models[0]?.id || '', ayar: 21, sira: 5, birimCmTel: 0.68, kesilenParca: 0.8, digerAgirliklar: 9.0, iscilik: 250 },
-          { modelId: models[0]?.id || '', ayar: 21, sira: 7, birimCmTel: 1.05, kesilenParca: 0.8, digerAgirliklar: 11.5, iscilik: 250 },
-          { modelId: models[0]?.id || '', ayar: 21, sira: 9, birimCmTel: 1.35, kesilenParca: 0.8, digerAgirliklar: 11.0, iscilik: 250 },
-          { modelId: models[0]?.id || '', ayar: 21, sira: 11, birimCmTel: 1.68, kesilenParca: 0.8, digerAgirliklar: 13.5, iscilik: 250 },
-          { modelId: models[0]?.id || '', ayar: 21, sira: 13, birimCmTel: 2.10, kesilenParca: 0.8, digerAgirliklar: 15.0, iscilik: 250 },
           
           // Klasik Hasır - 22 Ayar
           { modelId: models[0]?.id || '', ayar: 22, sira: 5, birimCmTel: 0.70, kesilenParca: 0.8, digerAgirliklar: 9.4, iscilik: 250 },
@@ -103,7 +82,7 @@ export class ProductService {
             }
           }
         });
-        console.log('Dummy products initialized:', this.productsSubject.value.length, '(without 8 ayar)');
+        console.log('Dummy products initialized:', this.productsSubject.value.length, '(14 and 22 ayar only)');
       }
     }
   }

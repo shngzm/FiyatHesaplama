@@ -9,15 +9,6 @@
     <div class="price-card">
       <div class="price-label">Güncel Altın Fiyatı (24 Ayar)</div>
       <div class="price-value">{{ goldPrice.selling | number:'1.2-2' }} ₺/gr</div>
-      <div class="price-meta">
-        <span class="update-time">{{ goldPrice.timestamp | date:'dd.MM.yyyy HH:mm' }}</span>
-        <span class="data-badge">
-          🟡 Demo Veri
-        </span>
-      </div>
-      <button class="btn btn-sm btn-refresh" (click)="refreshGoldPrice()" [disabled]="isLoadingPrice">
-        {{ isLoadingPrice ? '⏳ Yükleniyor...' : '🔄 Fiyatı Yenile' }}
-      </button>
     </div>
   </div>
 

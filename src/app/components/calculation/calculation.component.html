@@ -7,17 +7,6 @@
       <div class="price-header">
         <span class="price-label">💰 Altın Kuru:</span>
         <span class="price-value">{{ formatPrice(goldPrice.selling) }}/gram</span>
-        <button 
-          class="btn-refresh" 
-          (click)="refreshGoldPrice()" 
-          [disabled]="isLoadingPrice"
-          title="Kuru yenile">
-          🔄
-        </button>
-      </div>
-      <div class="price-timestamp">
-        {{ getCacheStatus() }}
-        <span class="mock-warning" *ngIf="!isRealApiData">⚠️ Demo veri</span>
       </div>
     </div>
     

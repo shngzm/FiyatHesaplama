@@ -23,11 +23,17 @@ export class GoldPriceService {
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.loadManualPrice();
+    // Set default price if no manual price
+    if (!this.getManualPrice()) {
+      const defaultPrice = this.getMockGoldPrice();
+      this.goldPriceSubject.next(defaultPrice);
+      this.lastFetchTime = Date.now();
+    }
   }
 
   /**
    * Get current gold price
-   * Prioritizes manual price, then cache, then API
+   * Returns manual price or default 7000 TL (no automatic API fetch)
    */
   getGoldPrice(): Observable<GoldPrice> {
     // Check for manual price first
@@ -38,29 +44,17 @@ export class GoldPriceService {
       return of(manualPrice);
     }
 
-    const now = Date.now();
+    // Return cached price if available
     const cachedPrice = this.goldPriceSubject.value;
-
-    // Return cached data if valid
-    if (cachedPrice && (now - this.lastFetchTime) < this.CACHE_DURATION_MS) {
+    if (cachedPrice) {
       return of(cachedPrice);
     }
 
-    // Prevent multiple simultaneous requests
-    if (this.isFetching) {
-      return this.goldPrice$.pipe(
-        map(price => {
-          if (!price) {
-            throw new Error('Altın kuru henüz yüklenmedi');
-          }
-          return price;
-        })
-      );
-    }
-
-    // Fetch fresh data
-    this.isFetching = true;
-    return this.fetchGoldPrice();
+    // Use default price (7000 TL)
+    const defaultPrice = this.getMockGoldPrice();
+    this.goldPriceSubject.next(defaultPrice);
+    this.lastFetchTime = Date.now();
+    return of(defaultPrice);
   }
 
   /**
@@ -95,13 +89,13 @@ export class GoldPriceService {
   }
 
   /**
-   * Get mock gold price data (fallback when API is unavailable)
+   * Get default gold price (7000 TL)
    */
   private getMockGoldPrice(): GoldPrice {
     return {
       currency: 'TRY',
-      buying: 7090.98,
-      selling: 7091.83,
+      buying: 7000,
+      selling: 7000,
       timestamp: new Date()
     };
   }
