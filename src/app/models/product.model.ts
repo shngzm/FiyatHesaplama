@@ -1,4 +1,4 @@
-export type Ayar = 14 | 22;
+export type Ayar = 8 | 10 | 14 | 18 | 21 | 22;
 
 export interface Product {
   id: string;

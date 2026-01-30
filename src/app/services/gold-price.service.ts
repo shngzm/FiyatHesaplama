@@ -163,13 +163,13 @@ export class GoldPriceService {
    * Calculate price for given weight, carat, and labor cost (işçilik)
    * Formula: (ayar_katsayısı + işçilik_milyem) × gram × altın_satış_fiyatı
    * @param weightInGrams Weight in grams
-   * @param carat Carat (14 or 22)
+   * @param carat Carat (8, 10, 14, 18, 21, or 22)
    * @param iscilikMilyem Labor cost in milyem (e.g., 250)
    * @returns Price in TL
    */
   calculatePrice(
     weightInGrams: number, 
-    carat: 14 | 22, 
+    carat: 8 | 10 | 14 | 18 | 21 | 22, 
     iscilikMilyem: number = 0
   ): Observable<{
     price: number;
@@ -180,8 +180,17 @@ export class GoldPriceService {
         // Use selling price for calculations
         const pricePerGram = goldPrice.selling;
         
-        // Ayar katsayısı: 14 ayar = 0.585, 22 ayar = 0.916
-        const ayarKatsayisi = carat === 14 ? 0.585 : 0.916;
+        // Ayar katsayıları
+        const ayarKatsayisiMap: { [key: number]: number } = {
+          8: 0.333,
+          10: 0.417,
+          14: 0.585,
+          18: 0.750,
+          21: 0.875,
+          22: 0.916
+        };
+        
+        const ayarKatsayisi = ayarKatsayisiMap[carat] || (carat / 24);
         
         // İşçilik milyemi ondalık sayıya çevir (250 milyem = 0.250)
         const iscilikKatsayisi = iscilikMilyem / 1000;

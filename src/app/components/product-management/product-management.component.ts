@@ -19,7 +19,7 @@ export class ProductManagementComponent implements OnInit, OnDestroy {
   productForm: FormGroup;
   models: Model[] = [];
   products: ProductWithModel[] = [];
-  ayarOptions: Ayar[] = [14, 22];
+  ayarOptions: Ayar[] = [8, 10, 14, 18, 21, 22];
   siraOptions: number[] = [];
   private destroy$ = new Subject<void>();
 

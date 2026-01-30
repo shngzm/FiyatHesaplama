@@ -32,6 +32,7 @@ export interface CalculationResult {
   bozmaFiyati?: number;     // Scrap price in TL (gram × ayar × buying price)
   altinKuru?: number;       // Gold price used (TL/gram)
   altinAlisKuru?: number;   // Gold buying price used (TL/gram)
+  ayarKatsayisi?: number;   // Ayar ratio used for calculation
   formula: string;
   breakdown: {
     uzunluk: number;

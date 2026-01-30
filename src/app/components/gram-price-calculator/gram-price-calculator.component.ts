@@ -17,8 +17,10 @@ export class GramPriceCalculatorComponent implements OnInit, OnDestroy {
   priceForm: FormGroup;
   ayarOptions = [
     { value: 8, label: '8 Ayar' },
+    { value: 10, label: '10 Ayar' },
     { value: 14, label: '14 Ayar' },
     { value: 18, label: '18 Ayar' },
+    { value: 21, label: '21 Ayar' },
     { value: 22, label: '22 Ayar' }
   ];
   
@@ -86,8 +88,17 @@ export class GramPriceCalculatorComponent implements OnInit, OnDestroy {
 
     console.log('Calculating price for:', { ayar, gram });
 
-    // Ayar oranını hesapla (örn: 14/24 = 0.5833)
-    const ayarRatio = ayar / 24;
+    // Ayar oranları (sabit değerler)
+    const ayarRatios: { [key: number]: number } = {
+      8: 0.333,
+      10: 0.417,
+      14: 0.585,
+      18: 0.750,
+      21: 0.875,
+      22: 0.916
+    };
+
+    const ayarRatio = ayarRatios[ayar] || (ayar / 24);
     
     // Gram başına fiyat
     this.pricePerGram = this.goldPrice.selling * ayarRatio;
@@ -96,6 +107,7 @@ export class GramPriceCalculatorComponent implements OnInit, OnDestroy {
     this.totalPrice = this.pricePerGram * gram;
 
     console.log('Calculation result:', {
+      ayar,
       ayarRatio,
       pricePerGram: this.pricePerGram,
       totalPrice: this.totalPrice
@@ -110,5 +122,18 @@ export class GramPriceCalculatorComponent implements OnInit, OnDestroy {
 
   refreshGoldPrice(): void {
     this.loadGoldPrice();
+  }
+
+  getAyarRatio(): number {
+    const ayar = parseInt(this.priceForm.value.ayar);
+    const ayarRatios: { [key: number]: number } = {
+      8: 0.333,
+      10: 0.417,
+      14: 0.585,
+      18: 0.750,
+      21: 0.875,
+      22: 0.916
+    };
+    return ayarRatios[ayar] || (ayar / 24);
   }
 }

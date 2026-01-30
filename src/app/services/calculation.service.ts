@@ -99,6 +99,23 @@ export class CalculationService {
         throw new Error('Ürün bulunamadı');
       }
       
+      // Ayar oranları (Tüm ürünler Elizi ürünüdür)
+      const ayarRatios: { [key: number]: number } = {
+        8: 0.333,
+        10: 0.417,
+        14: 0.585,
+        18: 0.750,
+        21: 0.875,
+        22: 0.916
+      };
+
+      const ayarKatsayisi = ayarRatios[input.ayar] || (input.ayar / 24);
+
+      console.log('Calculation with ayar ratio:', {
+        ayar: input.ayar,
+        ayarKatsayisi
+      });
+      
       // Then calculate price with işçilik
       return this.goldPriceService.calculatePrice(
         weightResult.sonuc, 
@@ -107,7 +124,6 @@ export class CalculationService {
       ).pipe(
         map(priceData => {
           // Calculate bozma fiyatı: gram × ayar katsayısı × alış fiyatı
-          const ayarKatsayisi = input.ayar === 14 ? 0.585 : 0.916;
           const bozmaFiyati = weightResult.sonuc * ayarKatsayisi * priceData.goldPrice.buying;
 
           const resultWithPrice: CalculationResult = {
@@ -115,7 +131,8 @@ export class CalculationService {
             fiyat: priceData.price,
             bozmaFiyati: bozmaFiyati,
             altinKuru: priceData.goldPrice.selling,
-            altinAlisKuru: priceData.goldPrice.buying
+            altinAlisKuru: priceData.goldPrice.buying,
+            ayarKatsayisi: ayarKatsayisi
           };
 
           // Update history with price and bozma fiyatı

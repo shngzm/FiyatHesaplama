@@ -95,11 +95,15 @@
           </div>
           <div class="bozma-row">
             <span class="bozma-label">Ayar Katsayısı:</span>
-            <span class="bozma-value">{{ calculationForm.get('ayar')?.value === 14 ? '0.585 (14 ayar)' : '0.916 (22 ayar)' }}</span>
+            <span class="bozma-value">{{ result.ayarKatsayisi || 0 }} ({{ calculationForm.get('ayar')?.value }} ayar)</span>
           </div>
           <div class="bozma-row">
             <span class="bozma-label">Altın Alış Fiyatı:</span>
             <span class="bozma-value">{{ formatPrice(result.altinAlisKuru || 0) }}/gram</span>
+          </div>
+          <div class="bozma-row">
+            <span class="bozma-label">Hesaplama:</span>
+            <span class="bozma-value">{{ result.sonuc }} × {{ result.ayarKatsayisi }} × {{ formatPrice(result.altinAlisKuru || 0) }}</span>
           </div>
           <div class="bozma-row bozma-total">
             <span class="bozma-label">Bozma Fiyatı:</span>
