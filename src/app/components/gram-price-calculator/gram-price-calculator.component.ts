@@ -35,6 +35,8 @@ export class GramPriceCalculatorComponent implements OnInit, OnDestroy {
   calculatedGram: number | null = null;
   calculatedAyarRatio: number | null = null;
   calculatedGoldPrice: number | null = null;
+  calculatedPricePerGram: number | null = null;
+  calculatedTotalPrice: number | null = null;
   
   private destroy$ = new Subject<void>();
 
@@ -106,17 +108,19 @@ export class GramPriceCalculatorComponent implements OnInit, OnDestroy {
 
     const ayarRatio = ayarRatios[ayar] || (ayar / 24);
     
-    // Store calculated values
-    this.calculatedAyar = ayar;
-    this.calculatedGram = gram;
-    this.calculatedAyarRatio = ayarRatio;
-    this.calculatedGoldPrice = this.goldPrice.selling;
-    
     // Gram başına fiyat
     this.pricePerGram = this.goldPrice.selling * ayarRatio;
     
     // Toplam fiyat
     this.totalPrice = this.pricePerGram * gram;
+    
+    // Store calculated values
+    this.calculatedAyar = ayar;
+    this.calculatedGram = gram;
+    this.calculatedAyarRatio = ayarRatio;
+    this.calculatedGoldPrice = this.goldPrice.selling;
+    this.calculatedPricePerGram = this.pricePerGram;
+    this.calculatedTotalPrice = this.totalPrice;
 
     console.log('Calculation result:', {
       ayar,
@@ -134,6 +138,8 @@ export class GramPriceCalculatorComponent implements OnInit, OnDestroy {
     this.calculatedGram = null;
     this.calculatedAyarRatio = null;
     this.calculatedGoldPrice = null;
+    this.calculatedPricePerGram = null;
+    this.calculatedTotalPrice = null;
   }
 
   refreshGoldPrice(): void {

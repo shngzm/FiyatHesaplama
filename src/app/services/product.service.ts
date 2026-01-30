@@ -8,7 +8,7 @@ import { ModelService } from './model.service';
   providedIn: 'root'
 })
 export class ProductService {
-  private readonly STORAGE_KEY = 'elizi_goldtool_products_v5'; // v3 - tüm ayarları içeren versiyon
+  private readonly STORAGE_KEY = 'elizi_goldtool_products_v5'; // v5 - sadece 14 ve 22 ayar
   private productsSubject = new BehaviorSubject<Product[]>([]);
   public products$ = this.productsSubject.asObservable();
 

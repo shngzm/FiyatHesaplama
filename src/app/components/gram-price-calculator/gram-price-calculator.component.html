@@ -71,7 +71,7 @@
         </div>
         <div class="result-item">
           <span class="result-label">Gram Başına Fiyat:</span>
-          <span class="result-value">{{ calculatedGoldPrice | number:'1.2-2' }} × {{ calculatedAyarRatio }} = {{ pricePerGram | number:'1.2-2' }} ₺</span>
+          <span class="result-value">{{ calculatedGoldPrice | number:'1.2-2' }} × {{ calculatedAyarRatio }} = {{ calculatedPricePerGram | number:'1.2-2' }} ₺</span>
         </div>
         <div class="result-item">
           <span class="result-label">Toplam Gram:</span>
@@ -80,11 +80,11 @@
         <div class="result-divider"></div>
         <div class="result-item">
           <span class="result-label">Hesaplama:</span>
-          <span class="result-value">{{ pricePerGram | number:'1.2-2' }} × {{ calculatedGram }} gr</span>
+          <span class="result-value">{{ calculatedPricePerGram | number:'1.2-2' }} × {{ calculatedGram }} gr</span>
         </div>
         <div class="result-item result-total">
           <span class="result-label">Toplam Satış Fiyatı:</span>
-          <span class="result-value total-price">{{ totalPrice | number:'1.2-2' }} ₺</span>
+          <span class="result-value total-price">{{ calculatedTotalPrice | number:'1.2-2' }} ₺</span>
         </div>
       </div>
     </div>
