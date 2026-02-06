@@ -31,7 +31,7 @@
         <label for="sira">Sıra</label>
         <select id="sira" formControlName="sira" class="form-control" [disabled]="siras.length === 0">
           <option value="">Seçiniz</option>
-          <option *ngFor="let sira of siras" [value]="sira">{{ sira }}. Sıra</option>
+          <option *ngFor="let sira of siras" [value]="sira">{{ sira }}</option>
         </select>
       </div>
 
