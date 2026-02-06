@@ -17,6 +17,7 @@ export class UserManagementComponent implements OnInit, OnDestroy {
   userForm: FormGroup;
   users: User[] = [];
   roleOptions: UserRole[] = ['admin', 'manager', 'representative'];
+  locationOptions: string[] = ['İstanbul', 'Ankara', 'Trabzon'];
   private destroy$ = new Subject<void>();
 
   constructor(

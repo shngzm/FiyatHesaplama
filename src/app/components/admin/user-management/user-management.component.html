@@ -31,13 +31,14 @@
 
         <div class="form-group">
           <label for="location">Lokasyon *</label>
-          <input 
-            type="text" 
+          <select 
             id="location" 
             formControlName="location"
             class="form-control"
-            placeholder="Örn: İstanbul Merkez"
           >
+            <option value="" disabled>Lokasyon seçiniz</option>
+            <option *ngFor="let location of locationOptions" [value]="location">{{ location }}</option>
+          </select>
         </div>
       </div>
 
