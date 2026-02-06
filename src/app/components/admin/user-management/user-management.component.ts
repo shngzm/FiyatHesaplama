@@ -75,7 +75,7 @@ export class UserManagementComponent implements OnInit, OnDestroy {
   getRoleLabel(role: UserRole): string {
     const labels: Record<UserRole, string> = {
       admin: 'Yönetici',
-      manager: 'Müdür',
+      manager: 'Mağaza Müdürü',
       representative: 'Satış Temsilcisi'
     };
     return labels[role];
