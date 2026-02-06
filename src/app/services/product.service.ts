@@ -31,9 +31,7 @@ export class ProductService {
           const model = models.find(m => m.id === product.modelId);
           return {
             ...product,
-            modelTipi: model?.modelTipi || 'Unknown',
-            kesimTipi: model?.kesimTipi || 'Dinamik',
-            pay: model?.pay || 0
+            modelTipi: model?.modelTipi || 'Unknown'
           } as ProductWithModel;
         });
       })

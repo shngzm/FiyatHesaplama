@@ -14,8 +14,6 @@ export interface Product {
   
   // Computed fields (for display)
   modelTipi?: string;
-  kesimTipi?: string;
-  pay?: number;
 }
 
 export interface CreateProductDto {
@@ -40,6 +38,4 @@ export interface UpdateProductDto {
 
 export interface ProductWithModel extends Product {
   modelTipi: string;
-  kesimTipi: string;
-  pay: number;
 }

@@ -7,7 +7,6 @@ export interface CalculationHistory {
   ayar: Ayar;
   sira: number;
   uzunluk: number;
-  pay: number;
   birimCmTel: number;
   digerAgirliklar: number;
   kesilenParca: number;
@@ -28,6 +27,7 @@ export interface CalculationInput {
 
 export interface CalculationResult {
   sonuc: number;
+  gram: number;             // Same as sonuc, for backward compatibility
   fiyat?: number;           // Price in TL
   bozmaFiyati?: number;     // Scrap price in TL (gram × ayar × buying price)
   altinKuru?: number;       // Gold price used (TL/gram)
@@ -36,7 +36,6 @@ export interface CalculationResult {
   formula: string;
   breakdown: {
     uzunluk: number;
-    pay: number;
     birimCmTel: number;
     digerAgirliklar: number;
     kesilenParca: number;

@@ -26,9 +26,7 @@ export class ModelManagementComponent implements OnInit, OnDestroy {
     private notificationService: NotificationService
   ) {
     this.modelForm = this.fb.group({
-      modelTipi: ['', [Validators.required, Validators.minLength(2)]],
-      kesimTipi: ['Dinamik', Validators.required],
-      pay: [{ value: 0, disabled: true }, [Validators.required, Validators.min(0)]]
+      modelTipi: ['', [Validators.required, Validators.minLength(2)]]
     });
   }
 
@@ -36,18 +34,6 @@ export class ModelManagementComponent implements OnInit, OnDestroy {
     this.modelService.models$
       .pipe(takeUntil(this.destroy$))
       .subscribe(models => this.models = models);
-
-    this.modelForm.get('kesimTipi')?.valueChanges
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(kesimTipi => {
-        const payControl = this.modelForm.get('pay');
-        if (kesimTipi === 'Dinamik') {
-          payControl?.setValue(0);
-          payControl?.disable();
-        } else {
-          payControl?.enable();
-        }
-      });
   }
 
   ngOnDestroy(): void {
@@ -63,16 +49,13 @@ export class ModelManagementComponent implements OnInit, OnDestroy {
 
     try {
       const formValue = this.modelForm.getRawValue();
-      // Convert pay to number if it's a string
       const dto: CreateModelDto = {
-        modelTipi: formValue.modelTipi,
-        kesimTipi: formValue.kesimTipi,
-        pay: typeof formValue.pay === 'string' ? parseFloat(formValue.pay) : formValue.pay
+        modelTipi: formValue.modelTipi
       };
       console.log('Creating model with:', dto);
       this.modelService.create(dto);
       this.notificationService.success('Model başarıyla eklendi');
-      this.modelForm.reset({ kesimTipi: 'Dinamik', pay: 0 });
+      this.modelForm.reset();
     } catch (error: any) {
       this.notificationService.error(error.message || 'Model eklenemedi');
     }

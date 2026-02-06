@@ -38,9 +38,7 @@ export class ModelService {
     if (isPlatformBrowser(this.platformId) && this.modelsSubject.value.length === 0) {
       console.log('Initializing sample model...');
       const sampleModel: CreateModelDto = { 
-        modelTipi: 'Klasik Hasır', 
-        kesimTipi: 'Dinamik', 
-        pay: 0 
+        modelTipi: 'Klasik Hasır'
       };
       
       this.create(sampleModel);

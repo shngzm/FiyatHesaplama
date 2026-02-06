@@ -67,15 +67,9 @@ export class ProductManagementComponent implements OnInit, OnDestroy {
   onModelChange(modelId: string): void {
     if (!modelId) return;
     
-    const model = this.models.find(m => m.id === modelId);
+    // Kesilen parça her zaman aktif
     const kesilenParcaControl = this.productForm.get('kesilenParca');
-    
-    if (model?.kesimTipi === 'Dinamik') {
-      kesilenParcaControl?.enable();
-    } else {
-      kesilenParcaControl?.setValue(0);
-      kesilenParcaControl?.disable();
-    }
+    kesilenParcaControl?.enable();
   }
 
   onSubmit(): void {

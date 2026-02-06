@@ -38,11 +38,10 @@ export class CalculationService {
       throw new Error('Model bulunamadı');
     }
 
-    // Calculate: ((Uzunluk - Kesilen Parça + Pay) * Birim CM Tel) + Diğer Ağırlıklar
+    // Calculate: ((Uzunluk - Kesilen Parça) * Birim CM Tel) + Diğer Ağırlıklar
     // Kesilen parça cm cinsinden, uzunluktan çıkarılır
     const sonuc = this.calculateWeight(
       input.uzunluk,
-      model.pay,
       product.birimCmTel,
       product.digerAgirliklar,
       product.kesilenParca
@@ -50,10 +49,10 @@ export class CalculationService {
 
     const result: CalculationResult = {
       sonuc: this.roundToTwoDecimals(sonuc),
-      formula: `((${input.uzunluk} - ${product.kesilenParca} + ${model.pay}) * ${product.birimCmTel}) + ${product.digerAgirliklar}`,
+      gram: this.roundToTwoDecimals(sonuc),
+      formula: `((${input.uzunluk} - ${product.kesilenParca}) * ${product.birimCmTel}) + ${product.digerAgirliklar}`,
       breakdown: {
         uzunluk: input.uzunluk,
-        pay: model.pay,
         birimCmTel: product.birimCmTel,
         digerAgirliklar: product.digerAgirliklar,
         kesilenParca: product.kesilenParca
@@ -68,7 +67,6 @@ export class CalculationService {
       ayar: input.ayar,
       sira: input.sira,
       uzunluk: input.uzunluk,
-      pay: model.pay,
       birimCmTel: product.birimCmTel,
       digerAgirliklar: product.digerAgirliklar,
       kesilenParca: product.kesilenParca,
@@ -153,12 +151,11 @@ export class CalculationService {
 
   calculateWeight(
     uzunluk: number,
-    pay: number,
     birimCmTel: number,
     digerAgirliklar: number,
     kesilenParcaCm: number
   ): number {
-    return ((uzunluk - kesilenParcaCm + pay) * birimCmTel) + digerAgirliklar;
+    return ((uzunluk - kesilenParcaCm) * birimCmTel) + digerAgirliklar;
   }
 
   getHistory(): Observable<CalculationHistory[]> {
