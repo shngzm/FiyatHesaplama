@@ -24,6 +24,11 @@ export class AppComponent {
     return this.authService.isLoggedIn();
   }
 
+  isAdmin(): boolean {
+    const user = this.authService.getCurrentUser();
+    return user?.role === 'admin';
+  }
+
   navigateTo(path: string): void {
     this.router.navigate([path]);
     this.closeMobileMenu();

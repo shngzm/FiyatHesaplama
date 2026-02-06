@@ -33,14 +33,16 @@
         
         <div class="nav-auth">
           @if (isAuthenticated()) {
-            <a routerLink="/admin/models" routerLinkActive="active" (click)="closeMobileMenu()">
-              <span class="nav-icon">📋</span>
-              <span class="nav-text">Model</span>
-            </a>
-            <a routerLink="/admin/products" routerLinkActive="active" (click)="closeMobileMenu()">
-              <span class="nav-icon">📦</span>
-              <span class="nav-text">Ürün</span>
-            </a>
+            @if (isAdmin()) {
+              <a routerLink="/admin/models" routerLinkActive="active" (click)="closeMobileMenu()">
+                <span class="nav-icon">📋</span>
+                <span class="nav-text">Model</span>
+              </a>
+              <a routerLink="/admin/products" routerLinkActive="active" (click)="closeMobileMenu()">
+                <span class="nav-icon">📦</span>
+                <span class="nav-text">Ürün</span>
+              </a>
+            }
             <button class="logout-btn" (click)="logout(); closeMobileMenu()">
               <span class="nav-icon">🚪</span>
               <span class="nav-text">Çıkış</span>
