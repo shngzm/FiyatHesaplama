@@ -9,6 +9,7 @@ import { GramPriceCalculatorComponent } from './components/gram-price-calculator
 import { GoldPriceManagementComponent } from './components/admin/gold-price-management/gold-price-management.component';
 import { UserManagementComponent } from './components/admin/user-management/user-management.component';
 import { authGuard } from './guards/auth.guard';
+import { adminGuard } from './guards/admin.guard';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -19,12 +20,12 @@ export const routes: Routes = [
   { 
     path: 'admin/models', 
     component: ModelManagementComponent,
-    canActivate: [authGuard]
+    canActivate: [adminGuard]
   },
   { 
     path: 'admin/products', 
     component: ProductManagementComponent,
-    canActivate: [authGuard]
+    canActivate: [adminGuard]
   },
   { 
     path: 'admin/gold-price', 
