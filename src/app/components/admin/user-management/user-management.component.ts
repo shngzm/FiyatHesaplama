@@ -16,7 +16,7 @@ import { NotificationService } from '../../../services/notification.service';
 export class UserManagementComponent implements OnInit, OnDestroy {
   userForm: FormGroup;
   users: User[] = [];
-  roleOptions: UserRole[] = ['admin', 'manager', 'user'];
+  roleOptions: UserRole[] = ['admin', 'manager', 'representative'];
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -28,7 +28,7 @@ export class UserManagementComponent implements OnInit, OnDestroy {
       username: ['', [Validators.required, Validators.minLength(3)]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       location: ['', Validators.required],
-      role: ['user', Validators.required]
+      role: ['representative', Validators.required]
     });
   }
 
@@ -53,7 +53,7 @@ export class UserManagementComponent implements OnInit, OnDestroy {
       const dto: CreateUserDto = this.userForm.value;
       this.userService.create(dto);
       this.notificationService.success('Kullanıcı başarıyla eklendi');
-      this.userForm.reset({ role: 'user' });
+      this.userForm.reset({ role: 'representative' });
     } catch (error: any) {
       this.notificationService.error(error.message || 'Kullanıcı eklenemedi');
     }
@@ -76,7 +76,7 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     const labels: Record<UserRole, string> = {
       admin: 'Yönetici',
       manager: 'Müdür',
-      user: 'Kullanıcı'
+      representative: 'Satış Temsilcisi'
     };
     return labels[role];
   }
