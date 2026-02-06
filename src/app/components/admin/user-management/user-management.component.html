@@ -1,0 +1,95 @@
+<div class="management-container">
+  <div class="management-header">
+    <h2>Kullanıcı Yönetimi</h2>
+  </div>
+
+  <div class="form-card">
+    <h3>Yeni Kullanıcı Ekle</h3>
+    <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="username">Kullanıcı Adı *</label>
+          <input 
+            type="text" 
+            id="username" 
+            formControlName="username"
+            class="form-control"
+            placeholder="Örn: ahmet.yilmaz"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="password">Şifre *</label>
+          <input 
+            type="password" 
+            id="password" 
+            formControlName="password"
+            class="form-control"
+            placeholder="En az 6 karakter"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="location">Lokasyon *</label>
+          <input 
+            type="text" 
+            id="location" 
+            formControlName="location"
+            class="form-control"
+            placeholder="Örn: İstanbul Merkez"
+          >
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="role">Rol *</label>
+          <select id="role" formControlName="role" class="form-control">
+            <option *ngFor="let role of roleOptions" [value]="role">{{ getRoleLabel(role) }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>&nbsp;</label>
+          <button type="submit" class="btn btn-primary" [disabled]="userForm.invalid">
+            ✅ Kullanıcı Ekle
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="table-card">
+    <h3>Kullanıcı Listesi</h3>
+    <table class="data-table" *ngIf="users.length > 0; else noUsers">
+      <thead>
+        <tr>
+          <th>Kullanıcı Adı</th>
+          <th>Lokasyon</th>
+          <th>Rol</th>
+          <th>Oluşturulma</th>
+          <th>İşlemler</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of users">
+          <td>{{ user.username }}</td>
+          <td>{{ user.location }}</td>
+          <td>
+            <span class="role-badge" [class]="'role-' + user.role">
+              {{ getRoleLabel(user.role) }}
+            </span>
+          </td>
+          <td>{{ user.createdAt | date:'short' }}</td>
+          <td>
+            <button class="btn btn-sm btn-danger" (click)="deleteUser(user)">🗑️ Sil</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <ng-template #noUsers>
+      <p class="no-data">Henüz kullanıcı eklenmemiş. Yukarıdaki formu kullanarak kullanıcı ekleyebilirsiniz.</p>
+    </ng-template>
+  </div>
+</div>

@@ -38,6 +38,7 @@
     gap: 1.5rem;
     justify-content: center;
     flex-wrap: wrap;
+    margin-bottom: 3rem;
 
     .btn-large {
       padding: 1rem 2.5rem;
@@ -48,6 +49,44 @@
       &:hover {
         transform: translateY(-2px);
         box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+      }
+    }
+  }
+
+  .admin-section {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 2px solid #e0e0e0;
+
+    h3 {
+      font-size: 1.5rem;
+      color: #555;
+      margin-bottom: 1.5rem;
+    }
+
+    .admin-buttons {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      max-width: 600px;
+      margin: 0 auto;
+
+      .btn-admin {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        background-color: #7f8c8d;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-weight: 600;
+
+        &:hover {
+          background-color: #6c7a7b;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
       }
     }
   }

@@ -7,6 +7,7 @@ import { CalculationComponent } from './components/calculation/calculation.compo
 import { ScrapCalculatorComponent } from './components/scrap-calculator/scrap-calculator.component';
 import { GramPriceCalculatorComponent } from './components/gram-price-calculator/gram-price-calculator.component';
 import { GoldPriceManagementComponent } from './components/admin/gold-price-management/gold-price-management.component';
+import { UserManagementComponent } from './components/admin/user-management/user-management.component';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -27,7 +28,13 @@ export const routes: Routes = [
   },
   { 
     path: 'admin/gold-price', 
-    component: GoldPriceManagementComponent
+    component: GoldPriceManagementComponent,
+    canActivate: [authGuard]
+  },
+  { 
+    path: 'admin/users', 
+    component: UserManagementComponent,
+    canActivate: [authGuard]
   },
   { path: '**', redirectTo: '' }
 ];
