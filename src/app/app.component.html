@@ -7,32 +7,32 @@
         <h1 class="app-title">Gram/Fiyat</h1>
       </div>
       
-      <button class="mobile-menu-toggle" (click)="toggleMobileMenu()" aria-label="Menüyü aç/kapat">
-        <span class="hamburger-icon">☰</span>
-      </button>
-      
-      <nav class="main-nav" [class.mobile-open]="mobileMenuOpen">
-        <div class="nav-links">
-          <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeMobileMenu()">
-            <span class="nav-icon">🏠</span>
-            <span class="nav-text">Ana Sayfa</span>
-          </a>
-          <a routerLink="/scrap-calculator" routerLinkActive="active" (click)="closeMobileMenu()">
-            <span class="nav-icon">💎</span>
-            <span class="nav-text">Bozma Fiyatı</span>
-          </a>
-          <a routerLink="/calculation" routerLinkActive="active" (click)="closeMobileMenu()">
-            <span class="nav-icon">🔢</span>
-            <span class="nav-text">Hesaplama</span>
-          </a>
-          <a routerLink="/admin/gold-price" routerLinkActive="active" (click)="closeMobileMenu()">
-            <span class="nav-icon">💰</span>
-            <span class="nav-text">Altın Kuru</span>
-          </a>
-        </div>
+      @if (isAuthenticated()) {
+        <button class="mobile-menu-toggle" (click)="toggleMobileMenu()" aria-label="Menüyü aç/kapat">
+          <span class="hamburger-icon">☰</span>
+        </button>
         
-        <div class="nav-auth">
-          @if (isAuthenticated()) {
+        <nav class="main-nav" [class.mobile-open]="mobileMenuOpen">
+          <div class="nav-links">
+            <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeMobileMenu()">
+              <span class="nav-icon">🏠</span>
+              <span class="nav-text">Ana Sayfa</span>
+            </a>
+            <a routerLink="/scrap-calculator" routerLinkActive="active" (click)="closeMobileMenu()">
+              <span class="nav-icon">💎</span>
+              <span class="nav-text">Bozma Fiyatı</span>
+            </a>
+            <a routerLink="/calculation" routerLinkActive="active" (click)="closeMobileMenu()">
+              <span class="nav-icon">🔢</span>
+              <span class="nav-text">Hesaplama</span>
+            </a>
+            <a routerLink="/admin/gold-price" routerLinkActive="active" (click)="closeMobileMenu()">
+              <span class="nav-icon">💰</span>
+              <span class="nav-text">Altın Kuru</span>
+            </a>
+          </div>
+          
+          <div class="nav-auth">
             @if (isAdmin()) {
               <a routerLink="/admin/models" routerLinkActive="active" (click)="closeMobileMenu()">
                 <span class="nav-icon">📋</span>
@@ -42,19 +42,18 @@
                 <span class="nav-icon">📦</span>
                 <span class="nav-text">Ürün</span>
               </a>
+              <a routerLink="/admin/users" routerLinkActive="active" (click)="closeMobileMenu()">
+                <span class="nav-icon">👥</span>
+                <span class="nav-text">Kullanıcılar</span>
+              </a>
             }
             <button class="logout-btn" (click)="logout(); closeMobileMenu()">
               <span class="nav-icon">🚪</span>
               <span class="nav-text">Çıkış</span>
             </button>
-          } @else {
-            <a routerLink="/admin/login" routerLinkActive="active" (click)="closeMobileMenu()">
-              <span class="nav-icon">🔐</span>
-              <span class="nav-text">Admin</span>
-            </a>
-          }
-        </div>
-      </nav>
+          </div>
+        </nav>
+      }
     </div>
   </header>
 

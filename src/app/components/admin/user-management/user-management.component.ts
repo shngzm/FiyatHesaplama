@@ -44,7 +44,7 @@ export class UserManagementComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  onSubmit(): void {
+  async onSubmit(): Promise<void> {
     if (this.userForm.invalid) {
       this.notificationService.error('Lütfen tüm alanları doldurun');
       return;
@@ -52,20 +52,25 @@ export class UserManagementComponent implements OnInit, OnDestroy {
 
     try {
       const dto: CreateUserDto = this.userForm.value;
-      this.userService.create(dto);
+      await this.userService.create(dto);
       this.notificationService.success('Kullanıcı başarıyla eklendi');
       this.userForm.reset({ role: 'representative' });
     } catch (error: any) {
+      console.error('[UserManagement] Create user error:', error);
       this.notificationService.error(error.message || 'Kullanıcı eklenemedi');
     }
   }
 
-  deleteUser(user: User): void {
+  async deleteUser(user: User): Promise<void> {
     const message = `"${user.username}" kullanıcısını silmek istediğinizden emin misiniz?`;
 
     if (confirm(message)) {
       try {
-        this.userService.delete(user.id);
+        const userId = user.id || user._id;
+        if (!userId) {
+          throw new Error('Kullanıcı ID bulunamadı');
+        }
+        await this.userService.deleteFromBackend(userId);
         this.notificationService.success('Kullanıcı başarıyla silindi');
       } catch (error: any) {
         this.notificationService.error(error.message || 'Kullanıcı silinemedi');

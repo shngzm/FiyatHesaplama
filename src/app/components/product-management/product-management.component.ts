@@ -72,7 +72,7 @@ export class ProductManagementComponent implements OnInit, OnDestroy {
     kesilenParcaControl?.enable();
   }
 
-  onSubmit(): void {
+  async onSubmit(): Promise<void> {
     if (this.productForm.invalid) {
       this.notificationService.error('Lütfen tüm alanları doldurun');
       return;
@@ -91,20 +91,26 @@ export class ProductManagementComponent implements OnInit, OnDestroy {
         iscilik: typeof formValue.iscilik === 'string' ? parseInt(formValue.iscilik, 10) : formValue.iscilik
       };
       console.log('Creating product with:', dto);
-      this.productService.create(dto);
+      await this.productService.create(dto);
       this.notificationService.success('Ürün başarıyla eklendi');
       this.productForm.reset();
     } catch (error: any) {
+      console.error('Product creation error:', error);
       this.notificationService.error(error.message || 'Ürün eklenemedi');
     }
   }
 
-  deleteProduct(product: ProductWithModel): void {
+  async deleteProduct(product: ProductWithModel): Promise<void> {
     const message = `${product.modelTipi} - ${product.ayar} ayar - Sıra ${product.sira} ürünü silmek istediğinizden emin misiniz?`;
     
     if (confirm(message)) {
-      this.productService.delete(product.id);
-      this.notificationService.success('Ürün başarıyla silindi');
+      try {
+        await this.productService.delete(product.id);
+        this.notificationService.success('Ürün başarıyla silindi');
+      } catch (error: any) {
+        console.error('Product deletion error:', error);
+        this.notificationService.error(error.message || 'Ürün silinemedi');
+      }
     }
   }
 }

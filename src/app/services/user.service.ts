@@ -1,57 +1,45 @@
-import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import { User, CreateUserDto, UpdateUserDto } from '../models/user.model';
+import { environment } from '../../environments/environment';
+
+interface ApiResponse {
+  success: boolean;
+  user?: User;
+  users?: User[];
+  message?: string;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
-  private readonly STORAGE_KEY = 'elizi_goldtool_users_v1';
+  private http = inject(HttpClient);
+  private apiUrl = `${environment.apiUrl}/auth`;
   private usersSubject = new BehaviorSubject<User[]>([]);
   public users$ = this.usersSubject.asObservable();
 
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) {
-    this.loadFromStorage();
-    this.initializeAdminUser();
+  constructor() {
+    // Load users from backend
+    this.loadUsers();
   }
 
-  private loadFromStorage(): void {
-    if (isPlatformBrowser(this.platformId)) {
-      const stored = localStorage.getItem(this.STORAGE_KEY);
-      if (stored) {
-        try {
-          const users = JSON.parse(stored).map((u: any) => ({
-            ...u,
-            createdAt: new Date(u.createdAt),
-            updatedAt: u.updatedAt ? new Date(u.updatedAt) : undefined
-          }));
-          this.usersSubject.next(users);
-        } catch (error) {
-          console.error('Failed to load users from storage:', error);
-        }
-      }
-    }
-  }
-
-  private initializeAdminUser(): void {
-    if (isPlatformBrowser(this.platformId) && this.usersSubject.value.length === 0) {
-      console.log('Initializing default admin user...');
-      const adminUser: CreateUserDto = {
-        username: 'admin',
-        password: 'admin123', // In production, this should be hashed
-        location: 'Merkez',
-        role: 'admin'
-      };
+  async loadUsers(): Promise<void> {
+    try {
+      console.log('[UserService] Loading users from backend...');
       
-      this.create(adminUser);
-      console.log('Default admin user created');
-    }
-  }
+      const response = await firstValueFrom(
+        this.http.get<ApiResponse>(`${this.apiUrl}/users`)
+      );
 
-  private saveToStorage(): void {
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.usersSubject.value));
+      if (response.success && response.users) {
+        console.log('[UserService] Loaded users:', response.users.length);
+        this.usersSubject.next(response.users);
+      }
+    } catch (error: any) {
+      console.error('[UserService] Load users error:', error);
+      // Don't throw - just log, UI will show empty list
     }
   }
 
@@ -63,37 +51,35 @@ export class UserService {
     return this.usersSubject.value.find(u => u.id === id);
   }
 
-  getByUsername(username: string): User | undefined {
-    return this.usersSubject.value.find(u => u.username.toLowerCase() === username.toLowerCase());
-  }
+  async create(dto: CreateUserDto): Promise<User> {
+    try {
+      console.log('[UserService] Creating user:', dto.username);
+      
+      const response = await firstValueFrom(
+        this.http.post<ApiResponse>(`${this.apiUrl}/register`, {
+          username: dto.username,
+          password: dto.password,
+          role: dto.role || 'representative'
+        })
+      );
 
-  create(dto: CreateUserDto): User {
-    // Check if username already exists
-    const exists = this.usersSubject.value.some(
-      u => u.username.toLowerCase() === dto.username.toLowerCase()
-    );
-    
-    if (exists) {
-      throw new Error('Bu kullanıcı adı zaten mevcut');
+      console.log('[UserService] User created:', response);
+
+      if (response.success && response.user) {
+        // Reload users from backend to get fresh data
+        await this.loadUsers();
+        return response.user;
+      } else {
+        throw new Error(response.message || 'Kullanıcı oluşturulamadı');
+      }
+    } catch (error: any) {
+      console.error('[UserService] Create user error:', error);
+      throw new Error(error.error?.message || 'Kullanıcı oluşturulurken hata oluştu');
     }
-
-    const newUser: User = {
-      id: this.generateId(),
-      ...dto,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-
-    const updated = [...this.usersSubject.value, newUser];
-    this.usersSubject.next(updated);
-    this.saveToStorage();
-
-    return newUser;
   }
 
   update(id: string, dto: UpdateUserDto): User {
     const index = this.usersSubject.value.findIndex(u => u.id === id);
-    
     if (index === -1) {
       throw new Error('Kullanıcı bulunamadı');
     }
@@ -117,8 +103,6 @@ export class UserService {
     };
 
     this.usersSubject.next(updated);
-    this.saveToStorage();
-
     return updated[index];
   }
 
@@ -135,10 +119,27 @@ export class UserService {
 
     const updated = this.usersSubject.value.filter(u => u.id !== id);
     this.usersSubject.next(updated);
-    this.saveToStorage();
   }
 
-  private generateId(): string {
-    return `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  async deleteFromBackend(id: string): Promise<void> {
+    try {
+      console.log('[UserService] Deleting user from backend:', id);
+      
+      const response = await firstValueFrom(
+        this.http.delete<ApiResponse>(`${this.apiUrl}/users/${id}`)
+      );
+
+      console.log('[UserService] User deleted:', response);
+
+      if (response.success) {
+        // Reload users from backend to get fresh data
+        await this.loadUsers();
+      } else {
+        throw new Error(response.message || 'Kullanıcı silinemedi');
+      }
+    } catch (error: any) {
+      console.error('[UserService] Delete user error:', error);
+      throw new Error(error.error?.message || 'Kullanıcı silinirken hata oluştu');
+    }
   }
 }

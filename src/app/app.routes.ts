@@ -10,22 +10,39 @@ import { GoldPriceManagementComponent } from './components/admin/gold-price-mana
 import { UserManagementComponent } from './components/admin/user-management/user-management.component';
 import { authGuard } from './guards/auth.guard';
 import { adminGuard } from './guards/admin.guard';
+import { adminManagerGuard } from './guards/admin-manager.guard';
 
 export const routes: Routes = [
-  { path: '', component: HomeComponent },
-  { path: 'scrap-calculator', component: ScrapCalculatorComponent },
-  { path: 'calculation', component: CalculationComponent },
-  { path: 'gram-price-calculator', component: GramPriceCalculatorComponent },
-  { path: 'admin/login', component: AdminLoginComponent },
+  { path: 'login', component: AdminLoginComponent },
+  { 
+    path: '', 
+    component: HomeComponent,
+    canActivate: [authGuard]
+  },
+  { 
+    path: 'scrap-calculator', 
+    component: ScrapCalculatorComponent,
+    canActivate: [authGuard]
+  },
+  { 
+    path: 'calculation', 
+    component: CalculationComponent,
+    canActivate: [authGuard]
+  },
+  { 
+    path: 'gram-price-calculator', 
+    component: GramPriceCalculatorComponent,
+    canActivate: [authGuard]
+  },
   { 
     path: 'admin/models', 
     component: ModelManagementComponent,
-    canActivate: [adminGuard]
+    canActivate: [adminManagerGuard]
   },
   { 
     path: 'admin/products', 
     component: ProductManagementComponent,
-    canActivate: [adminGuard]
+    canActivate: [adminManagerGuard]
   },
   { 
     path: 'admin/gold-price', 
@@ -37,5 +54,5 @@ export const routes: Routes = [
     component: UserManagementComponent,
     canActivate: [authGuard]
   },
-  { path: '**', redirectTo: '' }
+  { path: '**', redirectTo: 'login' }
 ];

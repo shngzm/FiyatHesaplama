@@ -1,53 +1,45 @@
 <div align="center">
-  <img src="src/assets/elizi-goldtool-logo.jpeg" alt="Elizi GoldTool Logo" width="200"/>
   
-  # Elizi GoldTool
+  # Gram Fiyat Hesaplama
   
-  ### Trabzon Hasırı Gram Hesaplama Uygulaması
+  ### Trabzon Hasırı Gram ve Fiyat Hesaplama Web Uygulaması
   
-  Modern Angular tabanlı kuyum ürünleri gram hesaplama ve yönetim uygulaması. Model ve ürün parametrelerine göre otomatik gram hesaplaması, LocalStorage tabanlı veri yönetimi ve admin paneli sunar.
-  
-  🌐 **[Web'den Kullan](https://[username].github.io/fiyathesaplama)** - Herhangi bir kurulum gerektirmez!
+  Modern Angular + Express + DynamoDB tabanlı kuyum ürünleri gram hesaplama ve yönetim uygulaması. Model ve ürün parametrelerine göre otomatik gram hesaplaması, DynamoDB veri saklama ve JWT authentication ile korunan admin paneli sunar.
   
 </div>
 
 ## 🚀 Özellikler
 
-- ✅ **Web'den Erişim:** Tarayıcıdan direkt kullanım, indirme gerektirmez
-- ✅ **Desktop Uygulamaları:** Mac (Apple Silicon & Intel) için offline kullanım
+### Frontend
+- ✅ **Angular 17** - Modern web framework
+- ✅ **Responsive Design** - Tüm cihazlarda çalışır
+- ✅ **TypeScript** - Tip güvenliği
+- ✅ **Reactive Forms** - Form yönetimi
+- ✅ **RxJS** - Reaktif programlama
+
+### Backend
+- ✅ **Express.js** - RESTful API
+- ✅ **JWT Authentication** - Güvenli kimlik doğrulama
+- ✅ **DynamoDB** - NoSQL veritabanı
+- ✅ **Rate Limiting** - DDoS koruması
+- ✅ **Helmet** - Güvenlik headers
+- ✅ **Compression** - Response sıkıştırma
+
+### Özellikler
 - ✅ Otomatik gram hesaplama (formül bazlı)
-- ✅ Model yönetimi (Dinamik/Statik kesim tipleri)
+- ✅ Model yönetimi (CRUD operations)
 - ✅ Ürün yönetimi (toplu ekleme, inline editing)
-- ✅ Admin paneli (şifre korumalı)
-- ✅ LocalStorage veri saklama
-- ✅ Hesaplama geçmişi (son 5 kayıt)
-- ✅ Responsive tasarım
-- ✅ TypeScript ile tip güvenliği
-- ✅ Reactive Forms kullanımı
-
-## 🌐 Web Versiyonu (Önerilen)
-
-**Hızlı Erişim:** https://[username].github.io/fiyathesaplama
-
-### Avantajlar:
-- ✅ Kurulum gerektirmez
-- ✅ Tüm cihazlarda çalışır (Mac, Windows, iPad, iPhone)
-- ✅ Otomatik güncellenir
-- ✅ Güvenlik uyarısı yok
-- ✅ Veriler tarayıcıda güvenle saklanır
-
-## 💻 Desktop Uygulamaları
-
-Offline kullanım için:
-- **EliziGramFiyat.dmg** - Apple Silicon (M1/M2/M3)
-- **EliziGramFiyat-Intel.dmg** - Intel Mac
-
-Kurulum talimatları için `EliziGramFiyat-Kullanim.txt` dosyasına bakın.
+- ✅ Altın fiyatı yönetimi
+- ✅ Admin paneli (JWT korumalı)
+- ✅ Hesaplama geçmişi
+- ✅ RESTful API
+- ✅ Real-time updates
 
 ## 📋 Gereksinimler
 
-- Node.js 18.x veya üzeri
+- Node.js 18.x veya üzeri (Production: 20.x önerilir)
 - npm 9.x veya üzeri
+- AWS Account (Production deployment için)
 - Modern web tarayıcı (Chrome, Firefox, Safari, Edge)
 
 ## 🛠️ Kurulum
@@ -57,75 +49,119 @@ Kurulum talimatları için `EliziGramFiyat-Kullanim.txt` dosyasına bakın.
 git clone <repo-url>
 cd fiyathesaplama
 
-# Bağımlılıkları yükleyin
+# Frontend bağımlılıkları
+npm install
+
+# Backend bağımlılıkları
+cd backend
 npm install
 ```
 
 ## 💻 Geliştirme
 
-### Development Server
+### Development Servers
+
+**Terminal 1 - DynamoDB Local:**
 ```bash
-# Geliştirme sunucusunu başlatın
-npm start
-# veya
-npx ng serve
+cd backend/dynamodb-local
+java -Djava.library.path=./DynamoDBLocal_lib -jar DynamoDBLocal.jar -sharedDb -port 8000
 ```
 
-Tarayıcınızda `http://localhost:4200/` adresine gidin. Kod değişiklikleriniz otomatik olarak yansıyacaktır.
+**Terminal 2 - Backend API:**
+```bash
+cd backend
+npm run dev
+# API çalışır: http://localhost:3000
+```
+
+**Terminal 3 - Frontend:**
+```bash
+npm start
+# Frontend çalışır: http://localhost:4200
+```
+
+### İlk Kurulum
+
+```bash
+# Backend tablolarını oluştur
+cd backend
+node src/config/createTables.js
+
+# Admin kullanıcı oluştur
+curl -X POST http://localhost:3000/api/auth/init
+
+# Admin giriş bilgileri:
+# Username: admin
+# Password: admin123
+```
 
 ### Production Build
+
+**Frontend:**
 ```bash
-# Production build oluşturun
-npm run build
-# veya
-npx ng build --configuration production
+npm run build:prod
+# Output: dist/fiyat-hesaplama/browser/
 ```
 
-Build dosyaları `dist/` klasöründe oluşturulacaktır.
+**Backend:**
+```bash
+cd backend
+npm run prod
+```
 
 ## 🧪 Testler
 
 ```bash
-# Unit testleri çalıştırın
+# Frontend unit testleri
 npm test
 
-# Test coverage raporu oluşturun
+# Test coverage
 npm run test:coverage
-
-# Coverage raporunu görüntüleyin
-open coverage/index.html
 ```
 
 ## 📚 Dokümantasyon
 
-Detaylı dokümantasyon için `docs/` klasörüne bakın:
-
-- **[PRD.md](docs/PRD.md)** - Ürün gereksinimleri ve özellikler
-- **[ROADMAP.md](docs/ROADMAP.md)** - Geliştirme yol haritası
-- **[STATE.md](docs/STATE.md)** - Proje durumu ve ilerleme
-- **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** - Mimari tasarım dokümantasyonu
-- **[TESTING.md](docs/TESTING.md)** - Test stratejisi ve kılavuzlar
+- **[DEPLOYMENT.md](DEPLOYMENT.md)** - Production deployment kılavuzu
+- **[docs/PRD.md](docs/PRD.md)** - Ürün gereksinimleri
+- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** - Mimari tasarım
+- **[docs/STATE.md](docs/STATE.md)** - Proje durumu
 
 ## 🏗️ Proje Yapısı
 
 ```
-src/app/
-  ├── components/       # UI bileşenleri
-  ├── services/         # Business logic ve data yönetimi
-  ├── models/           # TypeScript interface'ler
-  ├── validators/       # Custom form validatörleri
-  └── shared/           # Paylaşılan yardımcılar
+/
+├── src/                    # Frontend (Angular)
+│   ├── app/
+│   │   ├── components/    # UI bileşenleri
+│   │   ├── services/      # API servisleri
+│   │   ├── models/        # TypeScript interfaces
+│   │   ├── guards/        # Route guards
+│   │   └── interceptors/  # HTTP interceptors
+│   └── environments/      # Environment configs
+│
+├── backend/               # Backend (Express)
+│   ├── src/
+│   │   ├── config/       # DB ve app config
+│   │   ├── models/       # DynamoDB models
+│   │   ├── controllers/  # Route controllers
+│   │   ├── routes/       # API routes
+│   │   └── middleware/   # Auth & validation
+│   └── .env              # Environment variables
+│
+└── docs/                 # Dokümantasyon
 ```
 
-### Admin Paneli (mrc / 6161)
+## 🔐 Admin Paneli
 
-1. **Model Yönetimi**
-   - Yeni model ekleyin (Model Tipi, Kesim Tipi, Pay)
-   - Mevcut modelleri düzenleyin (inline editing)
-   - Kullanılmayan modelleri silin
+**Giriş:** http://localhost:4200/#/admin-login
+- Username: `admin`
+- Password: `admin123` (production'da değiştirin!)
 
-2. **Ürün Yönetimi**
-   - Toplu ürün ekleyin (alt alta satırlar)
+**Özellikler:**
+1. Model yönetimi (CRUD)
+2. Ürün yönetimi (CRUD)
+3. Altın fiyatı güncelleme
+4. Kullanıcı yönetimi
    - Model, Ayar, Sıra kombinasyonlarını tanımlayın
    - 1 cm tel, kesilen parça ve diğer ağırlıkları girin
    - Mevcut ürünleri düzenleyin veya silin

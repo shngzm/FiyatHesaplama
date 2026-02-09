@@ -1,25 +1,32 @@
-import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
-import { BehaviorSubject, Observable, combineLatest, map } from 'rxjs';
-import { Product, CreateProductDto, UpdateProductDto, ProductWithModel, Ayar } from '../models/product.model';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable, firstValueFrom, combineLatest, map } from 'rxjs';
+import { Product, CreateProductDto, UpdateProductDto, ProductWithModel } from '../models/product.model';
 import { ModelService } from './model.service';
+import { environment } from '../../environments/environment';
+
+interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  message?: string;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProductService {
-  private readonly STORAGE_KEY = 'elizi_goldtool_products_v5'; // v5 - sadece 14 ve 22 ayar
+  private http = inject(HttpClient);
+  private modelService = inject(ModelService);
+  private apiUrl = `${environment.apiUrl}/products`;
+  
   private productsSubject = new BehaviorSubject<Product[]>([]);
   public products$ = this.productsSubject.asObservable();
 
   // Products with model information
   public productsWithModel$: Observable<ProductWithModel[]>;
 
-  constructor(
-    private modelService: ModelService,
-    @Inject(PLATFORM_ID) private platformId: Object
-  ) {
-    this.loadFromStorage();
+  constructor() {
+    this.loadProducts();
     
     // Combine products with model data
     this.productsWithModel$ = combineLatest([
@@ -28,6 +35,15 @@ export class ProductService {
     ]).pipe(
       map(([products, models]) => {
         return products.map(product => {
+          // If modelId is already populated (from backend), use it
+          if (typeof product.modelId === 'object' && product.modelId !== null && 'modelTipi' in product.modelId) {
+            return {
+              ...product,
+              modelTipi: (product.modelId as any).modelTipi
+            } as ProductWithModel;
+          }
+          
+          // Otherwise find model from local cache
           const model = models.find(m => m.id === product.modelId);
           return {
             ...product,
@@ -36,77 +52,30 @@ export class ProductService {
         });
       })
     );
-    
-    // Initialize with dummy data after models are loaded
-    this.modelService.models$.subscribe(models => {
-      if (models.length > 0 && this.productsSubject.value.length === 0) {
-        console.log('Models loaded, initializing dummy products for', models.length, 'models');
-        this.initializeDummyData(models);
-      }
-    });
   }
 
-  private initializeDummyData(models: any[]): void {
-    if (isPlatformBrowser(this.platformId) && this.productsSubject.value.length === 0) {
-      console.log('Creating sample products for Klasik Hasır...');
-      console.log('Available models:', models.length, models);
+  private async loadProducts(): Promise<void> {
+    try {
+      const response = await firstValueFrom(
+        this.http.get<ApiResponse<Product[]>>(this.apiUrl)
+      );
       
-      if (models.length > 0) {
-        const modelId = models[0]?.id;
-        console.log('Using model ID:', modelId);
-        
-        const klasikHasirProducts: CreateProductDto[] = [
-          // Klasik Hasır - 14 Ayar
-          { modelId: models[0]?.id || '', ayar: 14, sira: 5, birimCmTel: 0.60, kesilenParca: 0.8, digerAgirliklar: 6.5, iscilik: 250 },
-          { modelId: models[0]?.id || '', ayar: 14, sira: 7, birimCmTel: 0.90, kesilenParca: 0.8, digerAgirliklar: 9.5, iscilik: 250 },
-          { modelId: models[0]?.id || '', ayar: 14, sira: 9, birimCmTel: 1.2, kesilenParca: 0.8, digerAgirliklar: 9.2, iscilik: 250 },
-          { modelId: models[0]?.id || '', ayar: 14, sira: 11, birimCmTel: 1.5, kesilenParca: 0.8, digerAgirliklar: 10.55, iscilik: 250 },
-          { modelId: models[0]?.id || '', ayar: 14, sira: 13, birimCmTel: 1.8, kesilenParca: 0.8, digerAgirliklar: 12, iscilik: 250 },
-          
-          // Klasik Hasır - 22 Ayar
-          { modelId: models[0]?.id || '', ayar: 22, sira: 5, birimCmTel: 0.70, kesilenParca: 0.8, digerAgirliklar: 9.4, iscilik: 250 },
-          { modelId: models[0]?.id || '', ayar: 22, sira: 7, birimCmTel: 1.11, kesilenParca: 0.8, digerAgirliklar: 12, iscilik: 250 },
-          { modelId: models[0]?.id || '', ayar: 22, sira: 9, birimCmTel: 1.40, kesilenParca: 0.8, digerAgirliklar: 11.7, iscilik: 250 },
-          { modelId: models[0]?.id || '', ayar: 22, sira: 11, birimCmTel: 1.75, kesilenParca: 0.8, digerAgirliklar: 14.4, iscilik: 250 },
-          { modelId: models[0]?.id || '', ayar: 22, sira: 13, birimCmTel: 2.19, kesilenParca: 0.8, digerAgirliklar: 16.2, iscilik: 250 },
-        ];
-
-        klasikHasirProducts.forEach(dto => {
-          if (dto.modelId) {
-            try {
-              this.create(dto);
-            } catch (error) {
-              console.log('Dummy product already exists, skipping');
-            }
-          }
-        });
-        console.log('Dummy products initialized:', this.productsSubject.value.length, '(14 and 22 ayar only)');
+      if (response.success && response.data) {
+        const products = response.data.map(p => this.normalizeProduct(p));
+        this.productsSubject.next(products);
       }
+    } catch (error) {
+      console.error('Failed to load products:', error);
     }
   }
 
-  private loadFromStorage(): void {
-    if (isPlatformBrowser(this.platformId)) {
-      const stored = localStorage.getItem(this.STORAGE_KEY);
-      if (stored) {
-        try {
-          const products = JSON.parse(stored).map((p: any) => ({
-            ...p,
-            createdAt: new Date(p.createdAt),
-            updatedAt: p.updatedAt ? new Date(p.updatedAt) : undefined
-          }));
-          this.productsSubject.next(products);
-        } catch (error) {
-          console.error('Failed to load products from storage:', error);
-        }
-      }
-    }
-  }
-
-  private saveToStorage(): void {
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.productsSubject.value));
-    }
+  private normalizeProduct(p: any): Product {
+    return {
+      ...p,
+      modelId: typeof p.modelId === 'object' ? p.modelId.id : p.modelId,
+      createdAt: new Date(p.createdAt),
+      updatedAt: p.updatedAt ? new Date(p.updatedAt) : undefined
+    };
   }
 
   getAll(): Observable<Product[]> {
@@ -117,165 +86,114 @@ export class ProductService {
     return this.productsSubject.value.find(p => p.id === id);
   }
 
-  getByModelAyarSira(modelId: string, ayar: Ayar, sira: number): Product | undefined {
-    console.log('getByModelAyarSira called with:', { modelId, ayar, ayarType: typeof ayar, sira, siraType: typeof sira });
-    const result = this.productsSubject.value.find(
-      p => {
-        const match = p.modelId === modelId && p.ayar === ayar && p.sira === sira;
-        if (!match) {
-          console.log('Product not matching:', { pModelId: p.modelId, pAyar: p.ayar, pAyarType: typeof p.ayar, pSira: p.sira, pSiraType: typeof p.sira });
-        }
-        return match;
-      }
+  getByModelAyarSira(modelId: string, ayar: number, sira: number): Product | undefined {
+    return this.productsSubject.value.find(
+      p => p.modelId === modelId && p.ayar === ayar && p.sira === sira
     );
-    console.log('getByModelAyarSira result:', result ? 'Found' : 'Not found');
-    return result;
   }
 
+  async create(dto: CreateProductDto): Promise<Product> {
+    try {
+      console.log('Sending product data to API:', dto);
+      console.log('API URL:', this.apiUrl);
+      
+      const response = await firstValueFrom(
+        this.http.post<ApiResponse<Product>>(this.apiUrl, dto)
+      );
+      
+      console.log('API response:', response);
+      
+      if (response.success && response.data) {
+        const newProduct = this.normalizeProduct(response.data);
+        const current = this.productsSubject.value;
+        this.productsSubject.next([...current, newProduct]);
+        return newProduct;
+      } else {
+        throw new Error(response.message || 'Ürün oluşturulamadı');
+      }
+    } catch (error: any) {
+      console.error('Failed to create product:', error);
+      console.error('Error details:', {
+        status: error.status,
+        statusText: error.statusText,
+        message: error.message,
+        error: error.error
+      });
+      throw error;
+    }
+  }
+
+  async update(id: string, dto: UpdateProductDto): Promise<Product> {
+    try {
+      const response = await firstValueFrom(
+        this.http.put<ApiResponse<Product>>(`${this.apiUrl}/${id}`, dto)
+      );
+      
+      if (response.success && response.data) {
+        const updatedProduct = this.normalizeProduct(response.data);
+        const current = this.productsSubject.value;
+        const index = current.findIndex(p => p.id === id);
+        if (index !== -1) {
+          current[index] = updatedProduct;
+          this.productsSubject.next([...current]);
+        }
+        return updatedProduct;
+      } else {
+        throw new Error(response.message || 'Ürün güncellenemedi');
+      }
+    } catch (error: any) {
+      console.error('Failed to update product:', error);
+      throw error;
+    }
+  }
+
+  async delete(id: string): Promise<void> {
+    try {
+      const response = await firstValueFrom(
+        this.http.delete<ApiResponse<any>>(`${this.apiUrl}/${id}`)
+      );
+      
+      if (response.success) {
+        const current = this.productsSubject.value;
+        this.productsSubject.next(current.filter(p => p.id !== id));
+      } else {
+        throw new Error(response.message || 'Ürün silinemedi');
+      }
+    } catch (error: any) {
+      console.error('Failed to delete product:', error);
+      throw error;
+    }
+  }
+
+  isProductExists(modelId: string, ayar: number, sira: number): boolean {
+    return this.productsSubject.value.some(
+      p => p.modelId === modelId && p.ayar === ayar && p.sira === sira
+    );
+  }
+
+  // Helper methods for components
   getByModel(modelId: string): Product[] {
     return this.productsSubject.value.filter(p => p.modelId === modelId);
   }
 
-  getAyarsForModel(modelId: string): Ayar[] {
+  getAyarsForModel(modelId: string): number[] {
     const products = this.getByModel(modelId);
     const ayars = [...new Set(products.map(p => p.ayar))];
-    return ayars.sort();
+    return ayars.sort((a, b) => a - b);
   }
 
-  getSirasForModelAndAyar(modelId: string, ayar: Ayar): number[] {
-    const allProducts = this.productsSubject.value;
-    console.log('All products:', allProducts);
-    console.log('Filtering for modelId:', modelId, 'ayar:', ayar, 'ayar type:', typeof ayar);
-    
-    const products = allProducts.filter(
-      p => {
-        const match = p.modelId === modelId && p.ayar === ayar;
-        console.log('Product:', { id: p.id, modelId: p.modelId, ayar: p.ayar, ayarType: typeof p.ayar, sira: p.sira, match });
-        return match;
-      }
+  getSirasForModelAndAyar(modelId: string, ayar: number): number[] {
+    const products = this.productsSubject.value.filter(
+      p => p.modelId === modelId && p.ayar === ayar
     );
-    console.log('getSirasForModelAndAyar:', { modelId, ayar, products: products.length, allProducts: allProducts.length });
-    const siras = [...new Set(products.map(p => p.sira))];
+    const siras = products.map(p => p.sira);
     return siras.sort((a, b) => a - b);
   }
 
-  create(dto: CreateProductDto): Product {
-    // Check if combination already exists
-    const exists = this.productsSubject.value.some(
-      p => p.modelId === dto.modelId && p.ayar === dto.ayar && p.sira === dto.sira
-    );
-    
-    if (exists) {
-      throw new Error('Bu kombinasyon zaten mevcut');
+  async deleteByModel(modelId: string): Promise<void> {
+    const productsToDelete = this.getByModel(modelId);
+    for (const product of productsToDelete) {
+      await this.delete(product.id!);
     }
-
-    const newProduct: Product = {
-      id: this.generateId(),
-      ...dto,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-
-    const current = this.productsSubject.value;
-    this.productsSubject.next([...current, newProduct]);
-    this.saveToStorage();
-    
-    return newProduct;
-  }
-
-  createMany(dtos: CreateProductDto[]): Product[] {
-    const newProducts: Product[] = [];
-    const current = this.productsSubject.value;
-    const allProducts = [...current];
-
-    for (const dto of dtos) {
-      // Check if combination already exists
-      const exists = allProducts.some(
-        p => p.modelId === dto.modelId && p.ayar === dto.ayar && p.sira === dto.sira
-      );
-      
-      if (exists) {
-        throw new Error(`Kombinasyon zaten mevcut: Ayar ${dto.ayar}, Sıra ${dto.sira}`);
-      }
-
-      const newProduct: Product = {
-        id: this.generateId(),
-        ...dto,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
-
-      newProducts.push(newProduct);
-      allProducts.push(newProduct);
-    }
-
-    this.productsSubject.next(allProducts);
-    this.saveToStorage();
-    return newProducts;
-  }
-
-  update(id: string, dto: UpdateProductDto): Product {
-    const current = this.productsSubject.value;
-    const index = current.findIndex(p => p.id === id);
-    
-    if (index === -1) {
-      throw new Error('Ürün bulunamadı');
-    }
-
-    // Check for duplicate if updating key fields
-    if (dto.modelId !== undefined || dto.ayar !== undefined || dto.sira !== undefined) {
-      const product = current[index];
-      const newModelId = dto.modelId ?? product.modelId;
-      const newAyar = dto.ayar ?? product.ayar;
-      const newSira = dto.sira ?? product.sira;
-
-      const duplicate = current.some(
-        p => p.id !== id && 
-             p.modelId === newModelId && 
-             p.ayar === newAyar && 
-             p.sira === newSira
-      );
-      
-      if (duplicate) {
-        throw new Error('Bu kombinasyon zaten mevcut');
-      }
-    }
-
-    const updated: Product = {
-      ...current[index],
-      ...dto,
-      updatedAt: new Date()
-    };
-
-    current[index] = updated;
-    this.productsSubject.next([...current]);
-    this.saveToStorage();
-    
-    return updated;
-  }
-
-  delete(id: string): void {
-    const current = this.productsSubject.value;
-    const filtered = current.filter(p => p.id !== id);
-    this.productsSubject.next(filtered);
-    this.saveToStorage();
-  }
-
-  deleteByModel(modelId: string): number {
-    const current = this.productsSubject.value;
-    const filtered = current.filter(p => p.modelId !== modelId);
-    const deletedCount = current.length - filtered.length;
-    this.productsSubject.next(filtered);
-    this.saveToStorage();
-    return deletedCount;
-  }
-
-  setProducts(products: Product[]): void {
-    this.productsSubject.next(products);
-    this.saveToStorage();
-  }
-
-  private generateId(): string {
-    return `product_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 }

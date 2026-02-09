@@ -1,11 +1,13 @@
 export type UserRole = 'admin' | 'manager' | 'representative';
 
 export interface User {
-  id: string;
+  _id?: string; // For backward compatibility
+  id?: string;  // DynamoDB uses id
   username: string;
   password: string; // In production, this should be hashed
-  location: string;
+  location?: string; // Optional for backend compatibility
   role: UserRole;
+  isActive?: boolean; // Backend field
   createdAt: Date;
   updatedAt?: Date;
 }

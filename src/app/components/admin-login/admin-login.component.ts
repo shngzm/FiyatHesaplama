@@ -32,7 +32,7 @@ export class AdminLoginComponent {
     return this.loginForm.controls;
   }
 
-  onSubmit(): void {
+  async onSubmit(): Promise<void> {
     this.submitted = true;
 
     if (this.loginForm.invalid) {
@@ -42,11 +42,11 @@ export class AdminLoginComponent {
     const username = this.loginForm.value.username;
     const password = this.loginForm.value.password;
 
-    const success = this.authService.login(username, password);
+    const success = await this.authService.login(username, password);
 
     if (success) {
       this.notificationService.success('Giriş başarılı!');
-      this.router.navigate(['/admin/models']);
+      this.router.navigate(['/']);
     } else {
       this.notificationService.error('Kullanıcı adı veya şifre hatalı');
       this.loginForm.patchValue({ password: '' });

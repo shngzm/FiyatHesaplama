@@ -114,36 +114,29 @@ export class CalculationService {
         ayarKatsayisi
       });
       
-      // Then calculate price with işçilik
-      return this.goldPriceService.calculatePrice(
+      // Calculate price with işçilik
+      const priceData = this.goldPriceService.calculatePrice(
         weightResult.sonuc, 
         input.ayar, 
         product.iscilik
-      ).pipe(
-        map(priceData => {
-          // Calculate bozma fiyatı: gram × ayar katsayısı × alış fiyatı
-          const bozmaFiyati = weightResult.sonuc * ayarKatsayisi * priceData.goldPrice.buying;
-
-          const resultWithPrice: CalculationResult = {
-            ...weightResult,
-            fiyat: priceData.price,
-            bozmaFiyati: bozmaFiyati,
-            altinKuru: priceData.goldPrice.selling,
-            altinAlisKuru: priceData.goldPrice.buying,
-            ayarKatsayisi: ayarKatsayisi
-          };
-
-          // Update history with price and bozma fiyatı
-          this.updateLastHistoryWithPrice(priceData.price, priceData.goldPrice.selling, bozmaFiyati, priceData.goldPrice.buying);
-
-          return resultWithPrice;
-        }),
-        catchError(error => {
-          console.error('Fiyat hesaplanamadı:', error);
-          // Return weight result without price if price calculation fails
-          return of(weightResult);
-        })
       );
+
+      // Calculate bozma fiyatı: gram × ayar katsayısı × alış fiyatı
+      const bozmaFiyati = weightResult.sonuc * ayarKatsayisi * priceData.goldPrice.buying;
+
+      const resultWithPrice: CalculationResult = {
+        ...weightResult,
+        fiyat: priceData.price,
+        bozmaFiyati: bozmaFiyati,
+        altinKuru: priceData.goldPrice.selling,
+        altinAlisKuru: priceData.goldPrice.buying,
+        ayarKatsayisi: ayarKatsayisi
+      };
+
+      // Update history with price and bozma fiyatı
+      this.updateLastHistoryWithPrice(priceData.price, priceData.goldPrice.selling, bozmaFiyati, priceData.goldPrice.buying);
+
+      return of(resultWithPrice);
     } catch (error) {
       throw error;
     }

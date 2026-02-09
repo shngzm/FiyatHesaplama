@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import { Model } from '../../models/model.model';
-import { Ayar } from '../../models/product.model';
 import { CalculationHistory, CalculationResult } from '../../models/calculation.model';
 import { ModelService } from '../../services/model.service';
 import { ProductService } from '../../services/product.service';
@@ -22,7 +21,7 @@ import { GoldPrice } from '../../models/gold-price.model';
 export class CalculationComponent implements OnInit, OnDestroy {
   calculationForm: FormGroup;
   models: Model[] = [];
-  ayars: Ayar[] = [];
+  ayars: number[] = [];
   siras: number[] = [];
   result: CalculationResult | null = null;
   history: CalculationHistory[] = [];
@@ -107,7 +106,7 @@ export class CalculationComponent implements OnInit, OnDestroy {
     }
   }
 
-  onAyarChange(ayar: Ayar | null): void {
+  onAyarChange(ayar: number | null): void {
     const modelId = this.calculationForm.get('modelId')?.value;
     console.log('Ayar changed to:', ayar, 'for model:', modelId);
     
@@ -119,7 +118,7 @@ export class CalculationComponent implements OnInit, OnDestroy {
 
     // Convert ayar to number if it's a string
     const ayarNumber = typeof ayar === 'string' ? parseInt(ayar, 10) : ayar;
-    this.siras = this.productService.getSirasForModelAndAyar(modelId, ayarNumber as Ayar);
+    this.siras = this.productService.getSirasForModelAndAyar(modelId, ayarNumber);
     console.log('Available siras:', this.siras);
     this.calculationForm.patchValue({ sira: '' });
 
