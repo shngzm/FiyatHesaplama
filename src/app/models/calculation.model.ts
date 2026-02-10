@@ -1,12 +1,15 @@
 import { Ayar } from './product.model';
 
+export type ProductType = 'Kolye/Bilezik' | 'Yüzük/Küpe';
+
 export interface CalculationHistory {
   id: string;
   modelTipi: string;
   modelId: string;
+  productType: ProductType;  // NEW: Product type for calculation
   ayar: Ayar;
   sira: number;
-  uzunluk: number;
+  uzunluk?: number;          // Optional: not used for Yüzük/Küpe
   birimCmTel: number;
   digerAgirliklar: number;
   kesilenParca: number;
@@ -20,9 +23,10 @@ export interface CalculationHistory {
 
 export interface CalculationInput {
   modelId: string;
+  productType: ProductType;  // NEW: Product type selection
   ayar: Ayar;
   sira: number;
-  uzunluk: number;
+  uzunluk?: number;          // Optional: only for Kolye/Bilezik
 }
 
 export interface CalculationResult {
@@ -36,7 +40,9 @@ export interface CalculationResult {
   iscilik?: number;         // Labor cost (milyem)
   formula: string;
   breakdown: {
-    uzunluk: number;
+    productType: ProductType;  // NEW: Include product type in breakdown
+    uzunluk?: number;
+    sira: number;              // NEW: Always include sira
     birimCmTel: number;
     digerAgirliklar: number;
     kesilenParca: number;

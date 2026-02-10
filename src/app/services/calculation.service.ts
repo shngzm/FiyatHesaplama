@@ -38,21 +38,40 @@ export class CalculationService {
       throw new Error('Model bulunamadı');
     }
 
-    // Calculate: ((Uzunluk - Kesilen Parça) * Birim CM Tel) + Diğer Ağırlıklar
-    // Kesilen parça cm cinsinden, uzunluktan çıkarılır
-    const sonuc = this.calculateWeight(
-      input.uzunluk,
-      product.birimCmTel,
-      product.digerAgirliklar,
-      product.kesilenParca
-    );
+    // Calculate weight based on product type
+    let sonuc: number;
+    let formula: string;
+    
+    if (input.productType === 'Kolye/Bilezik') {
+      // Original formula: ((Uzunluk - Kesilen Parça) * Birim CM Tel) + Diğer Ağırlıklar
+      if (!input.uzunluk || input.uzunluk <= 0) {
+        throw new Error('Uzunluk alanı Kolye/Bilezik için zorunludur');
+      }
+      sonuc = this.calculateKolyeBilezik(
+        input.uzunluk,
+        product.birimCmTel,
+        product.digerAgirliklar,
+        product.kesilenParca
+      );
+      formula = `((${input.uzunluk} - ${product.kesilenParca}) * ${product.birimCmTel}) + ${product.digerAgirliklar}`;
+    } else {
+      // Yüzük/Küpe formula: (Sıra * 1cm Tel) + Diğer Ağırlıklar
+      sonuc = this.calculateYuzukKupe(
+        input.sira,
+        product.birimCmTel,
+        product.digerAgirliklar
+      );
+      formula = `(${input.sira} * ${product.birimCmTel}) + ${product.digerAgirliklar}`;
+    }
 
     const result: CalculationResult = {
       sonuc: this.roundToTwoDecimals(sonuc),
       gram: this.roundToTwoDecimals(sonuc),
-      formula: `((${input.uzunluk} - ${product.kesilenParca}) * ${product.birimCmTel}) + ${product.digerAgirliklar}`,
+      formula,
       breakdown: {
+        productType: input.productType,
         uzunluk: input.uzunluk,
+        sira: input.sira,
         birimCmTel: product.birimCmTel,
         digerAgirliklar: product.digerAgirliklar,
         kesilenParca: product.kesilenParca
@@ -64,6 +83,7 @@ export class CalculationService {
       id: this.generateId(),
       modelTipi: model.modelTipi,
       modelId: input.modelId,
+      productType: input.productType,
       ayar: input.ayar,
       sira: input.sira,
       uzunluk: input.uzunluk,
@@ -150,6 +170,31 @@ export class CalculationService {
     kesilenParcaCm: number
   ): number {
     return ((uzunluk - kesilenParcaCm) * birimCmTel) + digerAgirliklar;
+  }
+
+  /**
+   * Calculate weight for Kolye/Bilezik type products
+   * Formula: ((Uzunluk - Kesilen Parça) * Birim CM Tel) + Diğer Ağırlıklar
+   */
+  private calculateKolyeBilezik(
+    uzunluk: number,
+    birimCmTel: number,
+    digerAgirliklar: number,
+    kesilenParcaCm: number
+  ): number {
+    return ((uzunluk - kesilenParcaCm) * birimCmTel) + digerAgirliklar;
+  }
+
+  /**
+   * Calculate weight for Yüzük/Küpe type products
+   * Formula: (Sıra * 1cm Tel) + Diğer Ağırlıklar
+   */
+  private calculateYuzukKupe(
+    sira: number,
+    birimCmTel: number,
+    digerAgirliklar: number
+  ): number {
+    return (sira * birimCmTel) + digerAgirliklar;
   }
 
   getHistory(): Observable<CalculationHistory[]> {

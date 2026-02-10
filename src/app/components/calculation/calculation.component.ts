@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import { Model } from '../../models/model.model';
-import { CalculationHistory, CalculationResult } from '../../models/calculation.model';
+import { CalculationHistory, CalculationResult, ProductType } from '../../models/calculation.model';
 import { ModelService } from '../../services/model.service';
 import { ProductService } from '../../services/product.service';
 import { CalculationService } from '../../services/calculation.service';
@@ -30,6 +30,9 @@ export class CalculationComponent implements OnInit, OnDestroy {
   isLoadingPrice: boolean = false;
   isRealApiData: boolean = false;
   
+  // Product type options
+  productTypes: ProductType[] = ['Kolye/Bilezik', 'Yüzük/Küpe'];
+  
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -41,6 +44,7 @@ export class CalculationComponent implements OnInit, OnDestroy {
     private notificationService: NotificationService
   ) {
     this.calculationForm = this.fb.group({
+      productType: ['Kolye/Bilezik', Validators.required],  // NEW: Default to Kolye/Bilezik
       modelId: ['', Validators.required],
       ayar: ['', Validators.required],
       sira: ['', Validators.required],
@@ -69,6 +73,13 @@ export class CalculationComponent implements OnInit, OnDestroy {
 
     this.loadGoldPrice();
 
+    // Watch for product type changes
+    this.calculationForm.get('productType')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(productType => {
+        this.onProductTypeChange(productType);
+      });
+
     this.calculationForm.get('modelId')?.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe(modelId => {
@@ -85,6 +96,24 @@ export class CalculationComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  onProductTypeChange(productType: ProductType): void {
+    console.log('Product type changed to:', productType);
+    
+    if (productType === 'Yüzük/Küpe') {
+      // Remove uzunluk requirement for Yüzük/Küpe
+      this.calculationForm.get('uzunluk')?.clearValidators();
+      this.calculationForm.get('uzunluk')?.setValue('');
+    } else {
+      // Restore uzunluk requirement for Kolye/Bilezik
+      this.calculationForm.get('uzunluk')?.setValidators([
+        Validators.required, 
+        Validators.min(0.01), 
+        Validators.max(1000)
+      ]);
+    }
+    this.calculationForm.get('uzunluk')?.updateValueAndValidity();
   }
 
   onModelChange(modelId: string): void {
@@ -137,10 +166,11 @@ export class CalculationComponent implements OnInit, OnDestroy {
       const input = this.calculationForm.value;
       // Convert string values to numbers
       const calculationInput = {
+        productType: input.productType as ProductType,
         modelId: input.modelId,
         ayar: typeof input.ayar === 'string' ? parseInt(input.ayar, 10) : input.ayar,
         sira: typeof input.sira === 'string' ? parseInt(input.sira, 10) : input.sira,
-        uzunluk: typeof input.uzunluk === 'string' ? parseFloat(input.uzunluk) : input.uzunluk
+        uzunluk: input.uzunluk ? (typeof input.uzunluk === 'string' ? parseFloat(input.uzunluk) : input.uzunluk) : undefined
       };
       console.log('Calculation input:', calculationInput);
       this.isLoadingPrice = true;
@@ -250,5 +280,13 @@ export class CalculationComponent implements OnInit, OnDestroy {
 
   get canCalculate(): boolean {
     return this.calculationForm.valid;
+  }
+
+  get isKolyeBilezik(): boolean {
+    return this.calculationForm.get('productType')?.value === 'Kolye/Bilezik';
+  }
+
+  get isYuzukKupe(): boolean {
+    return this.calculationForm.get('productType')?.value === 'Yüzük/Küpe';
   }
 }
