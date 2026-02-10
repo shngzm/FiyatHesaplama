@@ -111,17 +111,11 @@ export class GramPriceCalculatorComponent implements OnInit, OnDestroy {
 
     const ayarRatio = ayarRatios[ayar] || (ayar / 24);
     
-    // İşçilik katsayısı (milyem / 1000)
-    const iscilikKatsayisi = iscilikMilyem / 1000;
+    // Hesaplama Formülü: (Ayar Katsayısı + (İşçilik/1000)) * Altın satış kuru * gram
+    this.totalPrice = (ayarRatio + (iscilikMilyem / 1000)) * this.goldPrice.selling * gram;
     
-    // Toplam katsayı (ayar + işçilik)
-    const toplamKatsayi = ayarRatio + iscilikKatsayisi;
-    
-    // Gram başına fiyat (işçilik dahil)
-    this.pricePerGram = this.goldPrice.selling * toplamKatsayi;
-    
-    // Toplam fiyat
-    this.totalPrice = this.pricePerGram * gram;
+    // Gram başına fiyat
+    this.pricePerGram = this.totalPrice / gram;
     
     // Store calculated values
     this.calculatedAyar = ayar;
@@ -135,6 +129,11 @@ export class GramPriceCalculatorComponent implements OnInit, OnDestroy {
     console.log('Calculation result:', {
       ayar,
       ayarRatio,
+      iscilikMilyem,
+      iscilikKatsayisi: iscilikMilyem / 1000,
+      toplamKatsayi: ayarRatio + (iscilikMilyem / 1000),
+      goldPrice: this.goldPrice.selling,
+      gram,
       pricePerGram: this.pricePerGram,
       totalPrice: this.totalPrice
     });

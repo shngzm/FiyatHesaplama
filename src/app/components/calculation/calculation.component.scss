@@ -183,15 +183,18 @@
     .bozma-table {
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
+      gap: 0.5rem;
 
       .bozma-row {
-        display: flex;
+        display: inline-flex;
         justify-content: space-between;
         align-items: center;
-        padding: 0.75rem;
+        padding: 0.5rem 0.75rem;
         background: rgba(255, 255, 255, 0.1);
-        border-radius: 6px;
+        border-radius: 4px;
+        margin-right: 0.5rem;
+        margin-bottom: 0.25rem;
+        white-space: nowrap;
 
         &.bozma-total {
           background: rgba(255, 255, 255, 0.2);
@@ -199,14 +202,19 @@
           font-size: 1.1rem;
           margin-top: 0.5rem;
           border: 2px solid rgba(255, 255, 255, 0.3);
+          display: flex;
+          width: 100%;
         }
 
         .bozma-label {
           font-weight: 500;
+          margin-right: 0.5rem;
+          font-size: 0.9rem;
         }
 
         .bozma-value {
           font-weight: 600;
+          font-size: 0.9rem;
 
           &.price {
             color: #FFD700;

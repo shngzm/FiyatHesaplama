@@ -65,35 +65,54 @@
           <span class="result-label">Ağırlık:</span>
           <span class="result-value">{{ result.gram }} gram</span>
         </div>
-        <div class="result-item" *ngIf="result.fiyat">
-          <span class="result-label">Fiyat:</span>
-          <span class="result-value price">{{ formatPrice(result.fiyat) }}</span>
-        </div>
-        <div class="result-item" *ngIf="result.altinKuru">
-          <span class="result-label">Kullanılan Kur:</span>
-          <span class="result-value">{{ formatPrice(result.altinKuru) }}/gram</span>
+      </div>
+
+      <!-- Satış Fiyatı Detayı -->
+      <div *ngIf="result.fiyat" class="bozma-fiyati-section">
+        <h4>Satış Fiyatı</h4>
+        <div class="bozma-table" style="display: flex; flex-wrap: wrap;">
+          <div class="bozma-row">
+            <span class="bozma-label">Ürün Gramı:</span>
+            <span class="bozma-value">{{ result.gram }} g</span>
+          </div>
+          <div class="bozma-row">
+            <span class="bozma-label">Ayar:</span>
+            <span class="bozma-value">{{ result.ayarKatsayisi || 0 }} ({{ calculationForm.get('ayar')?.value }})</span>
+          </div>
+          <div class="bozma-row" *ngIf="result.iscilik !== undefined">
+            <span class="bozma-label">İşçilik:</span>
+            <span class="bozma-value">{{ result.iscilik / 1000 | number:'1.3-3' }}</span>
+          </div>
+          <div class="bozma-row" *ngIf="result.iscilik !== undefined">
+            <span class="bozma-label">Toplam:</span>
+            <span class="bozma-value">{{ (result.ayarKatsayisi || 0) + (result.iscilik / 1000) | number:'1.3-3' }}</span>
+          </div>
+          <div class="bozma-row">
+            <span class="bozma-label">Altın Kuru:</span>
+            <span class="bozma-value">{{ formatPrice(result.altinKuru || 0) }}/g</span>
+          </div>
+          <div class="bozma-row bozma-total">
+            <span class="bozma-label">Satış Fiyatı:</span>
+            <span class="bozma-value price">{{ formatPrice(result.fiyat) }}</span>
+          </div>
         </div>
       </div>
 
       <!-- Bozma Fiyatı Table -->
       <div *ngIf="result.bozmaFiyati" class="bozma-fiyati-section">
         <h4>Bozma Fiyatı</h4>
-        <div class="bozma-table">
+        <div class="bozma-table" style="display: flex; flex-wrap: wrap;">
           <div class="bozma-row">
             <span class="bozma-label">Ürün Gramı:</span>
-            <span class="bozma-value">{{ result.gram }} gram</span>
+            <span class="bozma-value">{{ result.gram }} g</span>
           </div>
           <div class="bozma-row">
-            <span class="bozma-label">Ayar Katsayısı:</span>
-            <span class="bozma-value">{{ result.ayarKatsayisi || 0 }} ({{ calculationForm.get('ayar')?.value }} ayar)</span>
+            <span class="bozma-label">Ayar:</span>
+            <span class="bozma-value">{{ result.ayarKatsayisi || 0 }} ({{ calculationForm.get('ayar')?.value }})</span>
           </div>
           <div class="bozma-row">
-            <span class="bozma-label">Altın Alış Fiyatı:</span>
-            <span class="bozma-value">{{ formatPrice(result.altinAlisKuru || 0) }}/gram</span>
-          </div>
-          <div class="bozma-row">
-            <span class="bozma-label">Hesaplama:</span>
-            <span class="bozma-value">{{ result.gram }} × {{ result.ayarKatsayisi }} × {{ formatPrice(result.altinAlisKuru || 0) }}</span>
+            <span class="bozma-label">Alış Kuru:</span>
+            <span class="bozma-value">{{ formatPrice(result.altinAlisKuru || 0) }}/g</span>
           </div>
           <div class="bozma-row bozma-total">
             <span class="bozma-label">Bozma Fiyatı:</span>

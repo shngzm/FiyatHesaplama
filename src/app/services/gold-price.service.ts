@@ -135,7 +135,7 @@ export class GoldPriceService {
     return Math.floor(diff / 60000);
   }
 
-  calculatePrice(weight: number, ayar: number, basePrice: number): {
+  calculatePrice(weight: number, ayar: number, iscilik: number): {
     price: number;
     goldPrice: { buying: number; selling: number };
   } {
@@ -144,8 +144,20 @@ export class GoldPriceService {
       throw new Error('Altın fiyatı yüklenemedi');
     }
 
-    const ayarKatsayisi = ayar / 24;
-    const price = weight * ayarKatsayisi * basePrice;
+    // Ayar oranları (sabit değerler)
+    const ayarRatios: { [key: number]: number } = {
+      8: 0.333,
+      10: 0.417,
+      14: 0.585,
+      18: 0.750,
+      21: 0.875,
+      22: 0.916
+    };
+
+    const ayarKatsayisi = ayarRatios[ayar] || (ayar / 24);
+    
+    // Hesaplama Formülü: (Ayar Katsayısı + (İşçilik/1000)) * Altın satış kuru * gram
+    const price = (ayarKatsayisi + (iscilik / 1000)) * current.selling * weight;
 
     return {
       price,

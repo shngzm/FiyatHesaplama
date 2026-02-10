@@ -84,9 +84,17 @@
           <span class="result-label">Ayar Katsayısı ({{ calculatedAyar }} Ayar):</span>
           <span class="result-value">{{ calculatedAyarRatio }}</span>
         </div>
-        <div class="result-item">
+        <div class="result-item" *ngIf="calculatedIscilik !== null">
+          <span class="result-label">İşçilik ({{ calculatedIscilik }} Milyem):</span>
+          <span class="result-value">{{ calculatedIscilik }} / 1000 = {{ (calculatedIscilik / 1000) | number:'1.3-3' }}</span>
+        </div>
+        <div class="result-item" *ngIf="calculatedIscilik !== null && calculatedAyarRatio !== null">
+          <span class="result-label">Toplam Katsayı:</span>
+          <span class="result-value">{{ calculatedAyarRatio }} + {{ (calculatedIscilik / 1000) | number:'1.3-3' }} = {{ (calculatedAyarRatio + (calculatedIscilik / 1000)) | number:'1.3-3' }}</span>
+        </div>
+        <div class="result-item" *ngIf="calculatedIscilik !== null && calculatedAyarRatio !== null">
           <span class="result-label">Gram Başına Fiyat:</span>
-          <span class="result-value">{{ calculatedGoldPrice | number:'1.2-2' }} × {{ calculatedAyarRatio }} = {{ calculatedPricePerGram | number:'1.2-2' }} ₺</span>
+          <span class="result-value">{{ calculatedGoldPrice | number:'1.2-2' }} × {{ (calculatedAyarRatio + (calculatedIscilik / 1000)) | number:'1.3-3' }} = {{ calculatedPricePerGram | number:'1.2-2' }} ₺</span>
         </div>
         <div class="result-item">
           <span class="result-label">Toplam Gram:</span>

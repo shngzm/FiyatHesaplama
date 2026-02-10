@@ -33,6 +33,7 @@ export interface CalculationResult {
   altinKuru?: number;       // Gold price used (TL/gram)
   altinAlisKuru?: number;   // Gold buying price used (TL/gram)
   ayarKatsayisi?: number;   // Ayar ratio used for calculation
+  iscilik?: number;         // Labor cost (milyem)
   formula: string;
   breakdown: {
     uzunluk: number;

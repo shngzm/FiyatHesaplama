@@ -130,7 +130,8 @@ export class CalculationService {
         bozmaFiyati: bozmaFiyati,
         altinKuru: priceData.goldPrice.selling,
         altinAlisKuru: priceData.goldPrice.buying,
-        ayarKatsayisi: ayarKatsayisi
+        ayarKatsayisi: ayarKatsayisi,
+        iscilik: product.iscilik
       };
 
       // Update history with price and bozma fiyatı
