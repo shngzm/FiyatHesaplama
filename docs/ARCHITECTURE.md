@@ -466,3 +466,643 @@ Components
     └─► NotificationService
             └─► User Feedback
 ```
+
+---
+
+## VERSION 2.0 - NEW ARCHITECTURE
+
+### 18. Version 2.0 System Overview
+
+Version 2.0 introduces three major features with AWS DynamoDB integration:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    Browser (Client)                             │
+│                                                                 │
+│  ┌──────────────────────────────────────────────────────────┐ │
+│  │            Angular Application v2.0                       │ │
+│  │                                                           │ │
+│  │  Components                   Services                   │ │
+│  │  ├── Calculation (Updated)    ├── Calculation           │ │
+│  │  ├── Customer Management      ├── Customer              │ │
+│  │  ├── Order Management         ├── Order                 │ │
+│  │  └── Report Dashboard         └── Report                │ │
+│  │                                                           │ │
+│  └──────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────┘
+                           │ HTTPS
+                           ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    AWS API Gateway                              │
+└─────────────────────────────────────────────────────────────────┘
+                           │
+                           ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    AWS Lambda (Node.js)                         │
+│  ├── Customer Controller                                        │
+│  ├── Order Controller                                           │
+│  └── Report Controller                                          │
+└─────────────────────────────────────────────────────────────────┘
+                           │
+           ┌───────────────┼───────────────┐
+           ▼               ▼               ▼
+    ┌──────────┐    ┌──────────┐    ┌──────────┐
+    │DynamoDB  │    │DynamoDB  │    │DynamoDB  │
+    │Customers │    │Orders    │    │Reports   │
+    └──────────┘    └──────────┘    └──────────┘
+                           │
+                           ▼
+                    ┌──────────┐
+                    │S3 Bucket │
+                    │Reports   │
+                    └──────────┘
+```
+
+---
+
+### 19. New Data Models (Version 2.0)
+
+#### 19.1 Customer Model
+```typescript
+interface Customer {
+  customerId: string;          // PK: UUID
+  name: string;                // Required
+  phone: string;               // Required, unique
+  email?: string;              // Optional
+  address?: string;            // Optional
+  notes?: string;              // Optional
+  createdAt: string;           // ISO 8601
+  updatedAt: string;           // ISO 8601
+}
+```
+
+#### 19.2 Order Model
+```typescript
+interface Order {
+  orderId: string;             // PK: UUID
+  customerId: string;          // FK: Customer
+  productType: 'Kolye/Bilezik' | 'Yüzük/Küpe';
+  modelId: string;             // FK: Model
+  ayar: 14 | 22;
+  sira: number;
+  uzunluk?: number;            // Only for Kolye/Bilezik
+  calculatedGram: number;
+  goldPrice: number;
+  totalPrice: number;
+  orderDate: string;           // ISO 8601
+  status: 'pending' | 'completed' | 'cancelled';
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+  
+  // Denormalized for display
+  customerName?: string;
+  customerPhone?: string;
+  modelName?: string;
+}
+```
+
+#### 19.3 Monthly Report Model
+```typescript
+interface MonthlyReport {
+  reportId: string;            // UUID
+  month: string;               // PK: "YYYY-MM"
+  totalOrders: number;
+  completedOrders: number;
+  cancelledOrders: number;
+  totalRevenue: number;
+  totalGrams: number;
+  ayar14Count: number;
+  ayar22Count: number;
+  kolyeBilezikCount: number;
+  yuzukKupeCount: number;
+  topModels: Array<{
+    modelId: string;
+    modelName: string;
+    count: number;
+  }>;
+  topCustomers: Array<{
+    customerId: string;
+    customerName: string;
+    orderCount: number;
+    totalSpent: number;
+  }>;
+  createdAt: string;
+  generatedBy: string;
+}
+```
+
+---
+
+### 20. DynamoDB Schema Design
+
+#### 20.1 Customers Table
+```
+Table Name: GramFiyat-Customers
+Partition Key: customerId (String)
+Sort Key: None
+
+GSI1: phone-index
+  - Partition Key: phone (String)
+  - Projection: ALL
+
+Attributes:
+  - customerId: String
+  - name: String
+  - phone: String
+  - email: String (optional)
+  - address: String (optional)
+  - notes: String (optional)
+  - createdAt: String
+  - updatedAt: String
+```
+
+#### 20.2 Orders Table
+```
+Table Name: GramFiyat-Orders
+Partition Key: orderId (String)
+Sort Key: orderDate (String)
+
+GSI1: customer-orders-index
+  - Partition Key: customerId (String)
+  - Sort Key: orderDate (String)
+  - Projection: ALL
+
+GSI2: status-orders-index
+  - Partition Key: status (String)
+  - Sort Key: orderDate (String)
+  - Projection: ALL
+
+Attributes: All Order fields (see model)
+```
+
+#### 20.3 Reports Table
+```
+Table Name: GramFiyat-Reports
+Partition Key: month (String) "YYYY-MM"
+Sort Key: createdAt (String)
+
+Attributes: All MonthlyReport fields (see model)
+```
+
+---
+
+### 21. API Endpoints (Version 2.0)
+
+#### 21.1 Customer Endpoints
+```
+POST   /api/customers              - Create customer
+GET    /api/customers              - List all customers
+GET    /api/customers/:id          - Get customer by ID
+PUT    /api/customers/:id          - Update customer
+DELETE /api/customers/:id          - Delete customer
+GET    /api/customers/phone/:phone - Check phone uniqueness
+```
+
+#### 21.2 Order Endpoints
+```
+POST   /api/orders                 - Create order
+GET    /api/orders                 - List orders (filters: status, dateRange, customerId)
+GET    /api/orders/:id             - Get order by ID
+PUT    /api/orders/:id             - Update order
+PUT    /api/orders/:id/status      - Update order status
+DELETE /api/orders/:id             - Delete order
+```
+
+#### 21.3 Report Endpoints
+```
+POST   /api/reports/generate       - Generate monthly report
+GET    /api/reports/:month         - Get report by month
+GET    /api/reports                - List all reports
+GET    /api/reports/:month/pdf     - Download PDF
+GET    /api/reports/:month/excel   - Download Excel
+POST   /api/reports/:reportId/upload-s3 - Upload to S3
+```
+
+---
+
+### 22. Component Architecture (Version 2.0)
+
+#### 22.1 Updated Component Hierarchy
+```
+AppComponent (Root)
+│
+├── HeaderComponent
+│
+├── HomeComponent
+│   └── Product Type Selection
+│
+├── CalculationComponent (Updated)
+│   ├── Product Type Dropdown (NEW)
+│   ├── Form Controls (Updated logic)
+│   ├── Calculate Button
+│   └── Create Order Button (NEW)
+│
+├── OrderFormModalComponent (NEW)
+│   ├── Customer Selection
+│   ├── New Customer Form
+│   └── Order Notes
+│
+├── CustomerManagementComponent (NEW)
+│   ├── Customer List Table
+│   ├── Add Customer Form
+│   ├── Edit Customer Modal
+│   └── Delete Confirmation
+│
+├── OrderManagementComponent (NEW)
+│   ├── Order List Table
+│   ├── Status Filter
+│   ├── Date Range Filter
+│   ├── Order Details Modal
+│   └── Update Status Modal
+│
+├── ReportDashboardComponent (NEW)
+│   ├── Month/Year Selector
+│   ├── Generate Report Button
+│   ├── Summary Cards
+│   ├── Charts Container
+│   │   ├── AyarDistributionChart
+│   │   ├── ProductTypeChart
+│   │   ├── MonthlyTrendChart
+│   │   └── TopModelsChart
+│   ├── Top Customers Table
+│   └── Export Buttons (PDF/Excel)
+│
+└── Admin Panel
+    ├── Model Management (Existing)
+    ├── Product Management (Existing)
+    ├── Customer Management (NEW)
+    ├── Order Management (NEW)
+    └── Reports (NEW)
+```
+
+---
+
+### 23. Service Architecture (Version 2.0)
+
+#### 23.1 New Services
+
+**CustomerService:**
+```typescript
+@Injectable({ providedIn: 'root' })
+export class CustomerService {
+  private apiUrl = environment.apiUrl + '/customers';
+  
+  create(customer: Partial<Customer>): Observable<Customer>
+  getAll(): Observable<Customer[]>
+  getById(id: string): Observable<Customer>
+  update(id: string, customer: Partial<Customer>): Observable<Customer>
+  delete(id: string): Observable<void>
+  checkPhoneUnique(phone: string): Observable<boolean>
+}
+```
+
+**OrderService:**
+```typescript
+@Injectable({ providedIn: 'root' })
+export class OrderService {
+  private apiUrl = environment.apiUrl + '/orders';
+  
+  create(order: Partial<Order>): Observable<Order>
+  getAll(filters?: OrderFilters): Observable<Order[]>
+  getById(id: string): Observable<Order>
+  update(id: string, order: Partial<Order>): Observable<Order>
+  updateStatus(id: string, status: OrderStatus): Observable<Order>
+  delete(id: string): Observable<void>
+}
+```
+
+**ReportService:**
+```typescript
+@Injectable({ providedIn: 'root' })
+export class ReportService {
+  private apiUrl = environment.apiUrl + '/reports';
+  
+  generate(month: string): Observable<MonthlyReport>
+  getByMonth(month: string): Observable<MonthlyReport>
+  getAll(): Observable<MonthlyReport[]>
+  exportPDF(month: string): Observable<Blob>
+  exportExcel(month: string): Observable<Blob>
+  uploadToS3(reportId: string): Observable<S3UploadResult>
+}
+```
+
+#### 23.2 Updated Services
+
+**CalculationService (Updated):**
+```typescript
+@Injectable({ providedIn: 'root' })
+export class CalculationService {
+  calculateGram(params: CalculationParams): number {
+    if (params.productType === 'Kolye/Bilezik') {
+      return this.calculateKolyeBilezik(params);
+    } else {
+      return this.calculateYuzukKupe(params);
+    }
+  }
+  
+  private calculateKolyeBilezik(params): number {
+    // ((Uzunluk + Pay) * 1cm Tel) + Diğer Ağırlıklar - Kesilen Parça
+    return ((params.uzunluk + params.pay) * params.birimCmTel) 
+           + params.digerAgirliklar - params.kesilenParca;
+  }
+  
+  private calculateYuzukKupe(params): number {
+    // (Sıra * 1cm Tel) + Diğer Ağırlıklar
+    return (params.sira * params.birimCmTel) + params.digerAgirliklar;
+  }
+}
+```
+
+---
+
+### 24. Data Flow (Version 2.0)
+
+#### 24.1 Order Creation Flow
+```
+User completes calculation
+     ↓
+Clicks "Sipariş Oluştur" button
+     ↓
+OrderFormModalComponent opens
+     ↓
+User selects/creates customer
+     ↓
+User fills order notes
+     ↓
+OrderService.create()
+     ↓
+POST /api/orders → Lambda
+     ↓
+DynamoDB Orders table (PUT)
+     ↓
+Success response
+     ↓
+Notification displayed
+     ↓
+Modal closes
+```
+
+#### 24.2 Report Generation Flow
+```
+Admin selects month/year
+     ↓
+Clicks "Rapor Oluştur"
+     ↓
+ReportService.generate(month)
+     ↓
+POST /api/reports/generate → Lambda
+     ↓
+DynamoDB Orders query (all orders for month)
+     ↓
+Calculate aggregations
+     ↓
+DynamoDB Reports table (PUT)
+     ↓
+Return report data
+     ↓
+ReportDashboardComponent displays charts
+     ↓
+User clicks "PDF İndir"
+     ↓
+ReportService.exportPDF(month)
+     ↓
+Lambda generates PDF
+     ↓
+Upload to S3
+     ↓
+Return download URL
+     ↓
+Browser downloads file
+```
+
+---
+
+### 25. Chart Architecture (ng2-charts)
+
+#### 25.1 Chart Components
+
+**AyarDistributionChart:**
+```typescript
+@Component({
+  selector: 'app-ayar-distribution-chart',
+  template: '<canvas baseChart [data]="chartData" [type]="chartType"></canvas>'
+})
+export class AyarDistributionChartComponent {
+  chartType: ChartType = 'bar';
+  chartData: ChartData = {
+    labels: ['14 Ayar', '22 Ayar'],
+    datasets: [{
+      label: 'Sipariş Sayısı',
+      data: [ayar14Count, ayar22Count],
+      backgroundColor: ['#FFD700', '#B8860B']
+    }]
+  };
+}
+```
+
+**ProductTypeChart:**
+```typescript
+@Component({
+  selector: 'app-product-type-chart',
+  template: '<canvas baseChart [data]="chartData" [type]="chartType"></canvas>'
+})
+export class ProductTypeChartComponent {
+  chartType: ChartType = 'pie';
+  chartData: ChartData = {
+    labels: ['Kolye/Bilezik', 'Yüzük/Küpe'],
+    datasets: [{
+      data: [kolyeBilezikCount, yuzukKupeCount],
+      backgroundColor: ['#4A90E2', '#9B59B6']
+    }]
+  };
+}
+```
+
+---
+
+### 26. S3 Integration Architecture
+
+#### 26.1 S3 Bucket Structure
+```
+gramfiyat-reports/
+├── 2026/
+│   ├── 01/
+│   │   ├── report-2026-01-20260201T120000Z.pdf
+│   │   └── report-2026-01-20260201T120000Z.xlsx
+│   ├── 02/
+│   └── 03/
+└── 2027/
+```
+
+#### 26.2 Lifecycle Configuration
+```json
+{
+  "Rules": [
+    {
+      "Id": "MoveToIA",
+      "Status": "Enabled",
+      "Transitions": [
+        {
+          "Days": 30,
+          "StorageClass": "STANDARD_IA"
+        },
+        {
+          "Days": 90,
+          "StorageClass": "GLACIER"
+        }
+      ]
+    }
+  ]
+}
+```
+
+---
+
+### 27. Security Architecture (Version 2.0)
+
+#### 27.1 Authentication Flow (Existing)
+```
+User login → POST /api/auth/login
+     ↓
+Lambda validates credentials
+     ↓
+Generate JWT token
+     ↓
+Return token to client
+     ↓
+Store in sessionStorage
+     ↓
+Include in all API requests (Authorization header)
+     ↓
+Lambda validates token on each request
+```
+
+#### 27.2 Authorization Levels
+```
+Guest:
+  - View calculation page only
+
+User (Authenticated):
+  - All Guest permissions
+  - Create orders
+  - View own order history
+
+Admin:
+  - All User permissions
+  - Manage customers
+  - Manage all orders
+  - Generate reports
+  - Export reports
+  - Manage models/products
+```
+
+#### 27.3 Data Security
+- Customer PII encrypted at rest (DynamoDB encryption)
+- HTTPS only (API Gateway + Amplify)
+- JWT tokens expire after 24 hours
+- Phone numbers hashed for uniqueness checks
+- S3 bucket private (presigned URLs for downloads)
+
+---
+
+### 28. Cost Optimization Architecture
+
+#### 28.1 DynamoDB Optimization
+```
+Strategy:
+1. Start with On-Demand billing
+2. Monitor read/write patterns (CloudWatch)
+3. Switch to Provisioned when traffic predictable
+4. Use Auto Scaling for Provisioned capacity
+5. Optimize query patterns with GSIs
+6. Implement caching in application layer
+```
+
+#### 28.2 Lambda Optimization
+```
+Strategy:
+1. Right-size memory allocation (1024MB start)
+2. Minimize cold starts (Provisioned Concurrency if needed)
+3. Reuse connections (database, S3)
+4. Optimize bundle size
+5. Use Lambda Layers for shared dependencies
+```
+
+#### 28.3 S3 Optimization
+```
+Strategy:
+1. Implement lifecycle policies (Standard → IA → Glacier)
+2. Compress PDF/Excel files
+3. Use CloudFront for frequent access (optional)
+4. Delete old reports after retention period
+5. Use Intelligent-Tiering for unpredictable access
+```
+
+---
+
+### 29. Monitoring & Logging Architecture
+
+#### 29.1 CloudWatch Metrics
+```
+Custom Metrics:
+- Order creation rate
+- Report generation time
+- Customer registration rate
+- API error rates
+- Lambda execution duration
+- DynamoDB throttling events
+```
+
+#### 29.2 Alarms
+```
+Critical Alarms:
+- Lambda error rate > 5%
+- API Gateway 5xx errors
+- DynamoDB read/write throttling
+- S3 upload failures
+- High AWS cost (> budget threshold)
+```
+
+#### 29.3 Logging Strategy
+```
+Logs to Capture:
+- All API requests/responses
+- Order creation events
+- Report generation events
+- Authentication failures
+- DynamoDB query performance
+- Error stack traces
+```
+
+---
+
+### 30. Performance Architecture
+
+#### 30.1 Frontend Performance
+```
+Optimizations:
+- OnPush change detection
+- Virtual scrolling for large lists
+- Lazy loading for admin modules
+- Image optimization
+- Chart data memoization
+- API response caching (5-10 minutes)
+```
+
+#### 30.2 Backend Performance
+```
+Optimizations:
+- DynamoDB GSI for efficient queries
+- Batch operations for bulk reads/writes
+- Connection pooling
+- Lambda warm starts (scheduled pings)
+- Async processing for reports
+- Pagination for large result sets
+```
+
+---
+
+**Last Updated:** 2026-02-10  
+**Version:** 2.0  
+**Status:** Planning Complete

@@ -847,5 +847,547 @@ Sonuç = ((40 + 1.50) * 0.35) + 3.20 - 0
 **Product Owner:** [İsim]  
 **Technical Lead:** [İsim]  
 **Approval Date:** [Tarih]  
-**Version:** 1.0  
+**Version:** 2.0  
 **Status:** Ready for Development
+
+---
+
+## 16. NEW FEATURES - Version 2.0
+
+### Feature 1: Product Type-Based Calculation System
+#### Overview
+Farklı ürün tipleri (Kolye/Bilezik vs Yüzük/Küpe) için farklı hesaplama formülleri uygulanacak.
+
+#### US-012: Product Type Selection
+**As a** kullanıcı  
+**I want to** ürün tipini seçmek  
+**So that** doğru formülle hesaplama yapılsın
+
+**Acceptance Criteria:**
+- Hesaplama sayfasında ürün tipi dropdown'u eklenmelidir
+- Seçenekler: "Kolye/Bilezik" ve "Yüzük/Küpe"
+- Default seçim: "Kolye/Bilezik"
+- Ürün tipi seçimi hesaplamadan önce yapılmalıdır
+
+#### Calculation Formulas by Product Type
+
+**Kolye/Bilezik (Existing Formula):**
+```
+Sonuç = ((Uzunluk + Pay) * 1cm Tel) + Diğer Ağırlıklar - Kesilen Parça
+```
+
+**Yüzük/Küpe (New Formula):**
+```
+Sonuç = (Sıra * 1cm Tel) + Diğer Ağırlıklar
+```
+
+**Key Differences:**
+- Yüzük/Küpe formülünde "Uzunluk", "Pay" ve "Kesilen Parça" kullanılmaz
+- Sadece "Sıra" ve "1cm Tel" çarpımı + Diğer Ağırlıklar
+
+**Form Field Behavior:**
+- Kolye/Bilezik seçildiğinde: Uzunluk alanı gösterilir (zorunlu)
+- Yüzük/Küpe seçildiğinde: Uzunluk alanı gizlenir veya disabled
+
+---
+
+### Feature 2: Order Management & Customer System
+#### Overview
+Müşteri bilgileri ve siparişleri DynamoDB'de saklanacak. Her sipariş bir müşteriye bağlı olacak (1-to-1).
+
+#### Data Models
+
+**Customer Model:**
+```typescript
+interface Customer {
+  customerId: string;          // PK: UUID
+  name: string;                // İsim
+  phone: string;               // Telefon (unique)
+  email?: string;              // Email (optional)
+  address?: string;            // Adres (optional)
+  notes?: string;              // Notlar (optional)
+  createdAt: string;           // ISO 8601 timestamp
+  updatedAt: string;           // ISO 8601 timestamp
+}
+```
+
+**Order Model:**
+```typescript
+interface Order {
+  orderId: string;             // PK: UUID
+  customerId: string;          // FK: Customer ID
+  productType: 'Kolye/Bilezik' | 'Yüzük/Küpe';
+  modelId: string;             // FK: Model ID
+  ayar: 14 | 22;
+  sira: number;
+  uzunluk?: number;            // Only for Kolye/Bilezik
+  calculatedGram: number;      // Hesaplanan gram
+  goldPrice: number;           // Kullanılan altın kuru
+  totalPrice: number;          // Hesaplanan fiyat
+  orderDate: string;           // ISO 8601 timestamp
+  status: 'pending' | 'completed' | 'cancelled';
+  notes?: string;              // Sipariş notları
+  createdAt: string;
+  updatedAt: string;
+  
+  // Denormalized for display
+  customerName?: string;
+  customerPhone?: string;
+  modelName?: string;
+}
+```
+
+#### DynamoDB Schema
+
+**Table: Customers**
+- Partition Key: `customerId` (String)
+- GSI1: `phone` (String) - For unique phone lookup
+- Attributes: All fields from Customer model
+
+**Table: Orders**
+- Partition Key: `orderId` (String)
+- Sort Key: `orderDate` (String)
+- GSI1: `customerId` + `orderDate` - For customer's orders
+- GSI2: `status` + `orderDate` - For filtering by status
+- Attributes: All fields from Order model
+
+#### US-013: Customer Management
+**As an** admin  
+**I want to** müşteri bilgilerini yönetmek  
+**So that** siparişleri müşterilere bağlayabilirim
+
+**Acceptance Criteria:**
+- Admin panelinde "Müşteri Yönetimi" sekmesi eklenmelidir
+- Müşteri CRUD işlemleri yapılabilmelidir
+- Telefon numarası unique olmalıdır
+- Müşteri listesi tablo formatında gösterilmelidir
+- Arama/filtreleme yapılabilmelidir
+- Müşteriye bağlı siparişler silinmemelidir (constraint)
+
+#### US-014: Order Creation from Calculation
+**As a** kullanıcı  
+**I want to** hesaplamadan direkt sipariş oluşturmak  
+**So that** müşteri bilgilerini kaydedebilirim
+
+**Acceptance Criteria:**
+- Hesaplama sonucunda "Sipariş Oluştur" butonu gösterilmelidir
+- Buton tıklandığında sipariş formu açılmalıdır
+- Form alanları:
+  - Müşteri Seçimi: Dropdown (mevcut müşteriler) + "Yeni Müşteri" seçeneği
+  - Yeni müşteri için: İsim, Telefon (zorunlu), Email, Adres (opsiyonel)
+  - Sipariş Notları (opsiyonel)
+  - Durum: Default "pending"
+- Hesaplama verileri otomatik doldurulmalıdır
+- Kayıt sonrası DynamoDB'ye yazılmalıdır
+- Başarı bildirimi gösterilmelidir
+
+#### US-015: Order Management
+**As an** admin  
+**I want to** siparişleri görüntülemek ve yönetmek  
+**So that** sipariş durumlarını takip edebilirim
+
+**Acceptance Criteria:**
+- Admin panelinde "Sipariş Yönetimi" sekmesi eklenmelidir
+- Tüm siparişler liste/tablo formatında gösterilmelidir
+- Kolonlar: Sipariş ID, Müşteri, Ürün Tipi, Model, Gram, Fiyat, Durum, Tarih
+- Durum filtreleme: Pending, Completed, Cancelled
+- Tarih aralığı filtreleme yapılabilmelidir
+- Sipariş detayları görüntülenebilmelidir
+- Sipariş durumu güncellenebilmelidir
+- Sipariş notları eklenebilir/güncellenebilir
+
+#### API Endpoints
+
+**Customers:**
+- `POST /api/customers` - Create customer
+- `GET /api/customers` - List all customers
+- `GET /api/customers/:id` - Get customer by ID
+- `PUT /api/customers/:id` - Update customer
+- `DELETE /api/customers/:id` - Delete customer (with constraint check)
+- `GET /api/customers/phone/:phone` - Check phone uniqueness
+
+**Orders:**
+- `POST /api/orders` - Create order
+- `GET /api/orders` - List orders (with filters: status, dateRange, customerId)
+- `GET /api/orders/:id` - Get order by ID
+- `PUT /api/orders/:id` - Update order
+- `PUT /api/orders/:id/status` - Update order status
+- `DELETE /api/orders/:id` - Delete order
+
+---
+
+### Feature 3: Monthly Reporting System
+#### Overview
+Admin kullanıcılar için aylık raporlama sistemi. Grafikler ve PDF/Excel export özellikleri.
+
+#### Report Data Model
+```typescript
+interface MonthlyReport {
+  reportId: string;            // PK: UUID
+  month: string;               // Format: "YYYY-MM"
+  totalOrders: number;         // Toplam sipariş sayısı
+  completedOrders: number;     // Tamamlanan sipariş
+  cancelledOrders: number;     // İptal edilen sipariş
+  totalRevenue: number;        // Toplam ciro (TL)
+  totalGrams: number;          // Toplam gram
+  ayar14Count: number;         // 14 ayar sipariş sayısı
+  ayar22Count: number;         // 22 ayar sipariş sayısı
+  kolyeBilezikCount: number;  // Kolye/Bilezik sayısı
+  yuzukKupeCount: number;     // Yüzük/Küpe sayısı
+  topModels: Array<{          // En çok sipariş alan modeller
+    modelId: string;
+    modelName: string;
+    count: number;
+  }>;
+  topCustomers: Array<{       // En çok sipariş veren müşteriler
+    customerId: string;
+    customerName: string;
+    orderCount: number;
+    totalSpent: number;
+  }>;
+  createdAt: string;
+  generatedBy: string;        // Admin user ID
+}
+```
+
+#### DynamoDB Schema
+
+**Table: Reports**
+- Partition Key: `month` (String) - Format: "YYYY-MM"
+- Sort Key: `createdAt` (String)
+- Attributes: All fields from MonthlyReport model
+
+**S3 Storage:**
+- Bucket: `gramfiyat-reports`
+- Path structure: `/reports/{year}/{month}/`
+- File naming: `report-{month}-{timestamp}.pdf` or `.xlsx`
+- Lifecycle policy:
+  - Standard (0-30 days)
+  - Standard-IA (30-90 days)
+  - Glacier (90+ days)
+
+#### US-016: Generate Monthly Report
+**As an** admin  
+**I want to** aylık rapor oluşturmak  
+**So that** işletme performansını görebilirim
+
+**Acceptance Criteria:**
+- Admin panelinde "Raporlar" sekmesi eklenmelidir
+- Ay ve yıl seçimi yapılabilmelidir
+- "Rapor Oluştur" butonu ile rapor generate edilmelidir
+- Rapor oluşturulurken loading gösterilmelidir
+- Rapor verileri DynamoDB'den hesaplanmalıdır
+- Rapor otomatik olarak DynamoDB'ye kaydedilmelidir
+- Başarı bildirimi gösterilmelidir
+
+#### US-017: View Report Dashboard
+**As an** admin  
+**I want to** rapor dashboard'unu görmek  
+**So that** verileri görsel olarak anlayabilirim
+
+**Acceptance Criteria:**
+- Rapor sayfasında özet kartlar gösterilmelidir:
+  - Toplam Sipariş
+  - Tamamlanan Sipariş
+  - Toplam Ciro
+  - Toplam Gram
+- Grafikler (ng2-charts kullanılarak):
+  - Bar Chart: Ayar dağılımı (14 vs 22)
+  - Pie Chart: Ürün tipi dağılımı (Kolye/Bilezik vs Yüzük/Küpe)
+  - Line Chart: Aylık trend (son 6 ay)
+  - Bar Chart: En çok sipariş alan modeller (top 5)
+  - Table: En çok sipariş veren müşteriler (top 10)
+- Grafiklerde hover tooltip gösterilmelidir
+- Responsive tasarım olmalıdır
+
+#### US-018: Export Report
+**As an** admin  
+**I want to** raporu PDF veya Excel olarak dışa aktarmak  
+**So that** paylaşabilir veya arşivleyebilirim
+
+**Acceptance Criteria:**
+- Rapor sayfasında "PDF İndir" ve "Excel İndir" butonları olmalıdır
+- PDF export:
+  - Logo ve başlık bilgisi
+  - Özet istatistikler
+  - Grafikler (görsel olarak)
+  - Tablo verileri
+- Excel export:
+  - Özet istatistikler (ilk sayfa)
+  - Detaylı sipariş listesi (ikinci sayfa)
+  - Müşteri istatistikleri (üçüncü sayfa)
+- Export işlemi background'da çalışmalıdır
+- Dosya hazır olunca otomatik indirilmelidir
+- Export sonrası S3'e yükleme yapılmalıdır
+- Export geçmişi tutulmalıdır
+
+#### API Endpoints
+
+**Reports:**
+- `POST /api/reports/generate` - Generate monthly report
+  - Body: `{ month: "YYYY-MM" }`
+  - Returns: Report data
+- `GET /api/reports/:month` - Get report by month
+- `GET /api/reports` - List all reports (with pagination)
+- `GET /api/reports/:month/pdf` - Generate and download PDF
+- `GET /api/reports/:month/excel` - Generate and download Excel
+- `POST /api/reports/:reportId/upload-s3` - Upload to S3
+
+#### Chart Requirements
+
+**ng2-charts Integration:**
+```typescript
+// Install
+npm install ng2-charts chart.js
+
+// Import in component
+import { BaseChartDirective } from 'ng2-charts';
+import { ChartConfiguration, ChartType } from 'chart.js';
+```
+
+**Chart Types:**
+1. **Bar Chart** - Ayar dağılımı
+2. **Pie Chart** - Ürün tipi dağılımı
+3. **Line Chart** - Aylık trend
+4. **Horizontal Bar Chart** - Top modeller
+
+**Chart Colors:**
+- 14 Ayar: Gold (#FFD700)
+- 22 Ayar: Dark Gold (#B8860B)
+- Kolye/Bilezik: Blue (#4A90E2)
+- Yüzük/Küpe: Purple (#9B59B6)
+
+---
+
+## 17. AWS Architecture for New Features
+
+### 17.1 DynamoDB Tables
+
+**Customers Table:**
+```
+Table Name: GramFiyat-Customers
+Billing Mode: On-Demand (start), Provisioned (scale)
+Partition Key: customerId (String)
+GSI1: phone-index
+  - Partition Key: phone (String)
+  - Projection: ALL
+Attributes: customerId, name, phone, email, address, notes, createdAt, updatedAt
+```
+
+**Orders Table:**
+```
+Table Name: GramFiyat-Orders
+Billing Mode: On-Demand (start), Provisioned (scale)
+Partition Key: orderId (String)
+Sort Key: orderDate (String)
+GSI1: customer-orders-index
+  - Partition Key: customerId (String)
+  - Sort Key: orderDate (String)
+  - Projection: ALL
+GSI2: status-orders-index
+  - Partition Key: status (String)
+  - Sort Key: orderDate (String)
+  - Projection: ALL
+Attributes: All Order fields
+```
+
+**Reports Table:**
+```
+Table Name: GramFiyat-Reports
+Billing Mode: On-Demand
+Partition Key: month (String)
+Sort Key: createdAt (String)
+Attributes: All MonthlyReport fields
+```
+
+### 17.2 S3 Configuration
+
+**Bucket: gramfiyat-reports**
+```
+Region: eu-central-1 (or closest)
+Versioning: Enabled
+Encryption: AES-256
+Public Access: Blocked
+CORS: Enabled for download
+```
+
+**Lifecycle Policy:**
+```json
+{
+  "Rules": [
+    {
+      "Id": "MoveToIA",
+      "Status": "Enabled",
+      "Transitions": [
+        {
+          "Days": 30,
+          "StorageClass": "STANDARD_IA"
+        },
+        {
+          "Days": 90,
+          "StorageClass": "GLACIER"
+        }
+      ]
+    }
+  ]
+}
+```
+
+### 17.3 Lambda Functions
+
+**New Functions:**
+- `generateMonthlyReport` - Calculate and store report
+- `exportReportPDF` - Generate PDF from report data
+- `exportReportExcel` - Generate Excel from report data
+- `uploadReportToS3` - Upload file to S3
+
+**Updated Functions:**
+- `createOrder` - New endpoint
+- `getOrders` - New endpoint with filters
+- `createCustomer` - New endpoint
+- `getCustomers` - New endpoint
+
+### 17.4 Cost Estimation (Monthly)
+
+**DynamoDB:**
+- Customers: ~1000 items × 1 KB = 1 MB storage → $0.25/month
+- Orders: ~5000 items × 2 KB = 10 MB storage → $2.50/month
+- Reports: ~12 items × 50 KB = 0.6 MB storage → $0.15/month
+- Read/Write (On-Demand): ~10,000 requests/month → $2.50/month
+
+**S3:**
+- Storage: ~100 reports × 5 MB = 500 MB → $0.01/month (Standard)
+- Standard-IA (30-90 days): 500 MB → $0.0125/month
+- Glacier (90+ days): 500 MB → $0.004/month
+- Data Transfer: 50 GB/month → $4.50/month
+
+**Lambda:**
+- Invocations: 50,000/month → $0.01/month
+- Duration: 10,000 GB-seconds → $0.17/month
+
+**CloudWatch:**
+- Logs: 10 GB/month → $0.50/month
+- Metrics: Basic (free)
+
+**API Gateway:**
+- 100,000 requests/month → $0.35/month
+
+**Total Estimated Cost:**
+- **Starting (On-Demand):** ~$18/month
+- **Scaling (Provisioned + optimization):** ~$73/month
+
+**Cost Optimization Tips:**
+1. Use DynamoDB On-Demand for starting
+2. Switch to Provisioned when traffic is predictable
+3. Implement S3 lifecycle policies
+4. Cache report data in frontend
+5. Optimize Lambda memory/duration
+6. Use CloudWatch Logs Insights sparingly
+
+---
+
+## 18. Implementation Phases
+
+### Phase 1: Product Type Calculation (Week 1-2)
+- [ ] Update Calculation model with productType field
+- [ ] Update CalculationService with new formula
+- [ ] Update UI: Add product type dropdown
+- [ ] Update form logic: Show/hide uzunluk field
+- [ ] Add tests for new formula
+- [ ] Update documentation
+
+### Phase 2: Customer Management (Week 3-4)
+- [ ] Create Customer model
+- [ ] Create DynamoDB Customers table
+- [ ] Create Customer API endpoints
+- [ ] Create Customer service (frontend)
+- [ ] Create Customer management component
+- [ ] Add tests
+- [ ] Update documentation
+
+### Phase 3: Order System (Week 5-6)
+- [ ] Create Order model
+- [ ] Create DynamoDB Orders table
+- [ ] Create Order API endpoints
+- [ ] Create Order service (frontend)
+- [ ] Update calculation component: Add "Sipariş Oluştur" button
+- [ ] Create order form modal
+- [ ] Create order management component
+- [ ] Add tests
+- [ ] Update documentation
+
+### Phase 4: Reporting System (Week 7-9)
+- [ ] Create MonthlyReport model
+- [ ] Create DynamoDB Reports table
+- [ ] Create S3 bucket with lifecycle
+- [ ] Create report generation Lambda
+- [ ] Create PDF export Lambda
+- [ ] Create Excel export Lambda
+- [ ] Install and configure ng2-charts
+- [ ] Create report dashboard component
+- [ ] Create chart components
+- [ ] Create export buttons
+- [ ] Add tests
+- [ ] Update documentation
+
+### Phase 5: Integration & Testing (Week 10)
+- [ ] End-to-end testing
+- [ ] Performance testing
+- [ ] Security audit
+- [ ] Documentation finalization
+- [ ] User acceptance testing
+- [ ] Production deployment
+- [ ] Monitor and optimize
+
+---
+
+## 19. Testing Strategy for New Features
+
+### 19.1 Unit Tests
+- Product type calculation formulas
+- Customer service CRUD operations
+- Order service CRUD operations
+- Report generation logic
+- Chart data transformation
+- PDF/Excel generation
+
+### 19.2 Integration Tests
+- Calculation → Order flow
+- Order → Customer relationship
+- Report generation from Orders
+- S3 upload/download
+- DynamoDB queries with GSIs
+
+### 19.3 E2E Tests
+- Complete order flow
+- Report generation and export
+- Customer management workflow
+- Multi-user scenarios (admin vs user)
+
+---
+
+## 20. Security Considerations
+
+### 20.1 Data Protection
+- Customer phone numbers encrypted at rest
+- PII (Personally Identifiable Information) handling
+- GDPR compliance considerations
+- Data retention policies
+
+### 20.2 Access Control
+- Only admin users can access reports
+- Only admin users can manage customers
+- Regular users can only create orders
+- S3 bucket access restricted to Lambda
+
+### 20.3 API Security
+- JWT token validation
+- Rate limiting on endpoints
+- Input sanitization
+- SQL/NoSQL injection prevention
+
+---
+
+**Last Updated:** 2026-02-10  
+**Version:** 2.0  
+**Status:** Ready for Implementation

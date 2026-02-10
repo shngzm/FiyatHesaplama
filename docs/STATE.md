@@ -1,11 +1,13 @@
 {
   "projectName": "Gram Fiyat Hesaplama (Fiyathesaplama)",
   "version": "2.0.0",
-  "lastUpdated": "2026-02-09",
+  "lastUpdated": "2026-02-10",
   "projectProgress": {
-    "overallStatus": "production-build-complete",
-    "currentPhase": "ready-for-aws-deployment",
-    "completionPercentage": 98
+    "overallStatus": "aws-integrated-ready-for-v2",
+    "currentPhase": "v2-feature-planning-complete",
+    "completionPercentage": 100,
+    "v1Status": "deployed-to-aws",
+    "v2Status": "planning-complete-ready-for-implementation"
   },
   "architecture": {
     "frontend": {
@@ -204,48 +206,123 @@
     {
       "id": 1,
       "priority": "high",
-      "task": "Update ARCHITECTURE.md with current implementation details",
+      "task": "Begin Milestone 11: Product Type-Based Calculation implementation",
       "assignedTo": "dev",
-      "dueDate": "2026-02-10"
+      "dueDate": "2026-02-24",
+      "status": "not-started"
     },
     {
       "id": 2,
       "priority": "high",
-      "task": "Update TESTING.md with test coverage and strategy",
+      "task": "Setup DynamoDB tables for Customers, Orders, Reports",
       "assignedTo": "dev",
-      "dueDate": "2026-02-10"
+      "dueDate": "2026-03-03",
+      "status": "not-started"
     },
     {
       "id": 3,
       "priority": "medium",
-      "task": "Improve code coverage to 60%+",
+      "task": "Implement Customer Management System",
       "assignedTo": "dev",
-      "dueDate": "2026-02-11"
+      "dueDate": "2026-03-10",
+      "status": "not-started"
     },
     {
       "id": 4,
       "priority": "medium",
-      "task": "Performance optimization and code review",
+      "task": "Implement Order System",
       "assignedTo": "dev",
-      "dueDate": "2026-02-11"
+      "dueDate": "2026-03-17",
+      "status": "not-started"
     },
     {
       "id": 5,
-      "priority": "low",
-      "task": "Prepare production build and deployment",
+      "priority": "medium",
+      "task": "Implement Reporting Infrastructure",
       "assignedTo": "dev",
-      "dueDate": "2026-02-12"
+      "dueDate": "2026-03-24",
+      "status": "not-started"
+    },
+    {
+      "id": 6,
+      "priority": "low",
+      "task": "Deploy Version 2.0 to production",
+      "assignedTo": "dev",
+      "dueDate": "2026-04-28",
+      "status": "not-started"
     }
   ],
+  "version2Features": {
+    "feature1_productTypeCalculation": {
+      "name": "Product Type-Based Calculation",
+      "status": "planned",
+      "description": "Different calculation formulas for Kolye/Bilezik vs Yüzük/Küpe",
+      "estimatedWeeks": 2,
+      "dependencies": []
+    },
+    "feature2_orderManagement": {
+      "name": "Order & Customer Management",
+      "status": "planned",
+      "description": "Customer management and order system with DynamoDB",
+      "estimatedWeeks": 4,
+      "dependencies": ["DynamoDB setup"]
+    },
+    "feature3_reporting": {
+      "name": "Monthly Reporting System",
+      "status": "planned",
+      "description": "Admin reporting with charts, PDF/Excel export, S3 storage",
+      "estimatedWeeks": 4,
+      "dependencies": ["Order Management", "ng2-charts", "S3 setup"]
+    }
+  },
+  "awsInfrastructure": {
+    "status": "v1-deployed",
+    "components": {
+      "amplify": {
+        "status": "configured",
+        "url": "pending-deployment",
+        "buildConfig": "amplify.yml created"
+      },
+      "lambda": {
+        "status": "needs-manual-deployment",
+        "issue": "handler configuration",
+        "solution": "Set handler to lambda.handler in AWS Console"
+      },
+      "apiGateway": {
+        "status": "configured",
+        "endpoints": "/api/auth, /api/models, /api/products, /api/gold-prices"
+      },
+      "dynamodb": {
+        "status": "running",
+        "tables": ["Users", "Models", "Products", "GoldPrices"],
+        "newTablesPlanned": ["Customers", "Orders", "Reports"]
+      },
+      "s3": {
+        "status": "planned-for-v2",
+        "purpose": "Report storage with lifecycle policies"
+      },
+      "cloudwatch": {
+        "status": "active",
+        "logs": "Lambda logs available"
+      }
+    },
+    "deploymentPackages": {
+      "frontend": "production-builds/amplify-manual-deploy.zip (183 KB)",
+      "backend": "production-builds/lambda-deployment.zip (4.5 MB)"
+    }
+  },
   "notes": [
-    "Project initialized with Angular 17 and SSR enabled",
-    "Documentation structure created following template guidelines",
-    "In-memory storage pattern implemented - no database",
-    "All dates use ISO format (YYYY-MM-DD)",
-    "Core features completed: price calculation, CRUD operations, admin panel",
-    "Application running successfully on http://localhost:4200",
-    "All 52 unit tests passing with 42% code coverage",
-    "Milestones M1-M8 completed successfully",
-    "Ready for documentation updates and final optimization"
+    "Version 1.0 completed and deployed to AWS",
+    "Amplify configuration fixed with amplify.yml",
+    "Lambda backend ready for deployment (manual upload needed)",
+    "All core features working: calculation, CRUD, admin panel, JWT auth",
+    "DynamoDB integration complete for v1 tables",
+    "Version 2.0 planning complete with 3 major features",
+    "PRD.md updated with complete v2 requirements",
+    "ROADMAP.md updated with 10 new milestones (M11-M20)",
+    "ARCHITECTURE.md needs update for v2 components",
+    "Estimated v2 completion: April 2026 (10 weeks)",
+    "AWS cost estimation: $18/month starting, scaling to $73/month",
+    "Ready to begin implementation of Product Type Calculation"
   ]
 }
