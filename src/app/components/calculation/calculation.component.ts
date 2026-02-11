@@ -2,14 +2,14 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
-import { Model } from '../../models/model.model';
-import { CalculationHistory, CalculationResult, ProductType } from '../../models/calculation.model';
-import { ModelService } from '../../services/model.service';
 import { ProductService } from '../../services/product.service';
 import { CalculationService } from '../../services/calculation.service';
 import { GoldPriceService } from '../../services/gold-price.service';
 import { NotificationService } from '../../services/notification.service';
+import { CustomerService } from '../../services/customer.service';
+import { OrderService } from '../../services/order.service';
 import { GoldPrice } from '../../models/gold-price.model';
+import { Customer } from '../../models/customer.model';
 
 @Component({
   selector: 'app-calculation',
@@ -18,79 +18,53 @@ import { GoldPrice } from '../../models/gold-price.model';
   templateUrl: './calculation.component.html',
   styleUrl: './calculation.component.scss'
 })
+
 export class CalculationComponent implements OnInit, OnDestroy {
   calculationForm: FormGroup;
-  models: Model[] = [];
+  productTypes = ['Kolye/Bilezik', 'Yüzük', 'Küpe'];
+  subTypeOptions: { value: string; label: string }[] = [];
+  models: any[] = [];
   ayars: number[] = [];
   siras: number[] = [];
-  result: CalculationResult | null = null;
-  history: CalculationHistory[] = [];
-  showBreakdown: boolean = false;
   goldPrice: GoldPrice | null = null;
-  isLoadingPrice: boolean = false;
-  isRealApiData: boolean = false;
-  
-  // Product type options
-  productTypes: ProductType[] = ['Kolye/Bilezik', 'Yüzük/Küpe'];
-  
+  result: any = null;
+  isLoadingPrice = false;
+  isSavingOrder = false;
+  customers: Customer[] = [];
+  customerControl = this.fb.control('', Validators.required);
+  showOrderModal = false;
+  history: any[] = [];
   private destroy$ = new Subject<void>();
 
   constructor(
     private fb: FormBuilder,
-    private modelService: ModelService,
     private productService: ProductService,
     private calculationService: CalculationService,
     private goldPriceService: GoldPriceService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private customerService: CustomerService,
+    private orderService: OrderService
   ) {
     this.calculationForm = this.fb.group({
-      productType: ['Kolye/Bilezik', Validators.required],  // NEW: Default to Kolye/Bilezik
+      productType: ['Kolye/Bilezik', Validators.required],
+      subType: ['', Validators.required],
       modelId: ['', Validators.required],
       ayar: ['', Validators.required],
       sira: ['', Validators.required],
-      uzunluk: ['', [Validators.required, Validators.min(0.01), Validators.max(1000)]]
+      uzunluk: ['']
     });
   }
 
   ngOnInit(): void {
-    this.modelService.models$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(models => {
-        this.models = models;
-      });
-
-    this.calculationService.history$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(history => {
-        this.history = history;
-      });
-
-    this.goldPriceService.goldPrice$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(price => {
-        this.goldPrice = price;
-      });
-
     this.loadGoldPrice();
-
-    // Watch for product type changes
+    this.loadCustomers();
+    this.onProductTypeChange();
     this.calculationForm.get('productType')?.valueChanges
       .pipe(takeUntil(this.destroy$))
-      .subscribe(productType => {
-        this.onProductTypeChange(productType);
-      });
-
+      .subscribe(() => this.onProductTypeChange());
     this.calculationForm.get('modelId')?.valueChanges
       .pipe(takeUntil(this.destroy$))
-      .subscribe(modelId => {
-        this.onModelChange(modelId);
-      });
-
-    this.calculationForm.get('ayar')?.valueChanges
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(ayar => {
-        this.onAyarChange(ayar);
-      });
+      .subscribe(() => this.onModelChange());
   }
 
   ngOnDestroy(): void {
@@ -98,195 +72,136 @@ export class CalculationComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  onProductTypeChange(productType: ProductType): void {
-    console.log('Product type changed to:', productType);
-    
-    if (productType === 'Yüzük/Küpe') {
-      // Remove uzunluk requirement for Yüzük/Küpe
-      this.calculationForm.get('uzunluk')?.clearValidators();
-      this.calculationForm.get('uzunluk')?.setValue('');
-    } else {
-      // Restore uzunluk requirement for Kolye/Bilezik
-      this.calculationForm.get('uzunluk')?.setValidators([
-        Validators.required, 
-        Validators.min(0.01), 
-        Validators.max(1000)
-      ]);
-    }
-    this.calculationForm.get('uzunluk')?.updateValueAndValidity();
-  }
-
-  onModelChange(modelId: string): void {
-    console.log('Model changed to:', modelId);
-    if (!modelId) {
-      this.ayars = [];
-      this.siras = [];
-      this.calculationForm.patchValue({ ayar: '', sira: '' });
-      return;
-    }
-
-    this.ayars = this.productService.getAyarsForModel(modelId);
-    console.log('Available ayars:', this.ayars);
-    this.siras = [];
-    this.calculationForm.patchValue({ ayar: '', sira: '' });
-
-    if (this.ayars.length === 1) {
-      this.calculationForm.patchValue({ ayar: this.ayars[0] });
-    }
-  }
-
-  onAyarChange(ayar: number | null): void {
-    const modelId = this.calculationForm.get('modelId')?.value;
-    console.log('Ayar changed to:', ayar, 'for model:', modelId);
-    
-    if (!modelId || !ayar) {
-      this.siras = [];
-      this.calculationForm.patchValue({ sira: '' });
-      return;
-    }
-
-    // Convert ayar to number if it's a string
-    const ayarNumber = typeof ayar === 'string' ? parseInt(ayar, 10) : ayar;
-    this.siras = this.productService.getSirasForModelAndAyar(modelId, ayarNumber);
-    console.log('Available siras:', this.siras);
-    this.calculationForm.patchValue({ sira: '' });
-
-    if (this.siras.length === 1) {
-      this.calculationForm.patchValue({ sira: this.siras[0] });
-    }
-  }
-
-  calculate(): void {
-    if (this.calculationForm.invalid) {
-      this.notificationService.error('Lütfen tüm alanları doldurun');
-      return;
-    }
-
-    try {
-      const input = this.calculationForm.value;
-      // Convert string values to numbers
-      const calculationInput = {
-        productType: input.productType as ProductType,
-        modelId: input.modelId,
-        ayar: typeof input.ayar === 'string' ? parseInt(input.ayar, 10) : input.ayar,
-        sira: typeof input.sira === 'string' ? parseInt(input.sira, 10) : input.sira,
-        uzunluk: input.uzunluk ? (typeof input.uzunluk === 'string' ? parseFloat(input.uzunluk) : input.uzunluk) : undefined
-      };
-      console.log('Calculation input:', calculationInput);
-      this.isLoadingPrice = true;
-      
-      this.calculationService.calculateWithPrice(calculationInput)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (result) => {
-            this.result = result;
-            this.isLoadingPrice = false;
-            
-            if (result.fiyat) {
-              this.notificationService.success('Gram ve fiyat hesaplama başarılı!');
-            } else {
-              this.notificationService.success('Gram hesaplama başarılı! (Fiyat hesaplanamadı)');
-            }
-          },
-          error: (error) => {
-            this.isLoadingPrice = false;
-            this.notificationService.error(error.message || 'Hesaplama hatası');
-            this.result = null;
-          }
-        });
-    } catch (error: any) {
-      this.isLoadingPrice = false;
-      this.notificationService.error(error.message || 'Hesaplama hatası');
-      this.result = null;
-    }
-  }
-
-  loadGoldPrice(): void {
-    this.goldPriceService.getGoldPrice()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (price) => {
-          this.goldPrice = price;
-          this.isRealApiData = true;
-        },
-        error: (error) => {
-          console.error('Altın kuru yüklenemedi:', error);
-          this.isRealApiData = false;
-        }
-      });
-  }
-
-  refreshGoldPrice(): void {
-    this.isLoadingPrice = true;
-    this.goldPriceService.refreshGoldPrice()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (price) => {
-          this.goldPrice = price;
-          this.isLoadingPrice = false;
-          this.isRealApiData = true;
-          this.notificationService.success('Altın kuru güncellendi');
-        },
-        error: (error) => {
-          this.isLoadingPrice = false;
-          this.isRealApiData = false;
-          this.notificationService.error('Altın kuru güncellenemedi');
-        }
-      });
-  }
-
-  reset(): void {
-    this.calculationForm.reset();
-    this.result = null;
-    this.showBreakdown = false;
-    this.ayars = [];
-    this.siras = [];
-  }
-
-  toggleBreakdown(): void {
-    this.showBreakdown = !this.showBreakdown;
-  }
-
-  formatPrice(price: number): string {
-    return new Intl.NumberFormat('tr-TR', {
-      style: 'currency',
-      currency: 'TRY',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(price);
-  }
-
-  formatDate(date: Date): string {
-    return new Intl.DateTimeFormat('tr-TR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(new Date(date));
-  }
-
-  getCacheStatus(): string {
-    if (!this.goldPrice) return '';
-    
-    const isCacheValid = this.goldPriceService.isCacheValid();
-    const ageMinutes = this.goldPriceService.getCacheAgeMinutes();
-    
-    if (isCacheValid) {
-      return `${ageMinutes} dakika önce güncellendi`;
-    }
-    return 'Güncelleme gerekli';
-  }
-
-  get canCalculate(): boolean {
-    return this.calculationForm.valid;
-  }
-
   get isKolyeBilezik(): boolean {
     return this.calculationForm.get('productType')?.value === 'Kolye/Bilezik';
   }
-
   get isYuzukKupe(): boolean {
-    return this.calculationForm.get('productType')?.value === 'Yüzük/Küpe';
+    const t = this.calculationForm.get('productType')?.value;
+    return t === 'Yüzük' || t === 'Küpe';
+  }
+  get canCalculate(): boolean {
+    if (!this.calculationForm.valid) return false;
+    if (this.isKolyeBilezik && (!this.calculationForm.get('uzunluk')?.value || this.calculationForm.get('uzunluk')?.value <= 0)) return false;
+    return true;
+  }
+
+  onProductTypeChange(): void {
+    const type = this.calculationForm.get('productType')?.value;
+    // Subtype options (dummy for now)
+    this.subTypeOptions = [
+      { value: 'standart', label: 'Standart' }
+    ];
+    // Models
+    this.models = this.productService.getProductsByType(type);
+    this.ayars = [];
+    this.siras = [];
+    this.calculationForm.patchValue({ modelId: '', ayar: '', sira: '', uzunluk: '' });
+  }
+
+  onModelChange(): void {
+    const modelId = this.calculationForm.get('modelId')?.value;
+    const model = this.models.find(m => m.id === modelId);
+    this.ayars = model?.ayars || [];
+    this.siras = model?.siras || [];
+    this.calculationForm.patchValue({ ayar: '', sira: '' });
+  }
+
+  loadGoldPrice(): void {
+    this.goldPriceService.goldPrice$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(price => this.goldPrice = price);
+    this.goldPriceService.getGoldPrice().subscribe();
+  }
+
+  loadCustomers(): void {
+    this.customerService.getCustomers().pipe(takeUntil(this.destroy$)).subscribe(res => {
+      if (res.success) this.customers = res.data;
+    });
+  }
+
+  calculate(): void {
+    if (!this.canCalculate) {
+      this.notificationService.showError('Lütfen tüm alanları doldurun');
+      return;
+    }
+    this.isLoadingPrice = true;
+    const input = {
+      productType: this.calculationForm.get('productType')?.value,
+      modelId: this.calculationForm.get('modelId')?.value,
+      ayar: this.calculationForm.get('ayar')?.value,
+      sira: this.calculationForm.get('sira')?.value,
+      uzunluk: this.isKolyeBilezik ? this.calculationForm.get('uzunluk')?.value : undefined
+    };
+    this.calculationService.calculateWithPrice(input).subscribe({
+      next: (res) => {
+        this.result = res;
+        this.isLoadingPrice = false;
+      },
+      error: (err) => {
+        this.notificationService.showError(err.message || 'Hesaplama hatası');
+        this.isLoadingPrice = false;
+      }
+    });
+  }
+
+  reset(): void {
+    this.calculationForm.reset({ productType: 'Kolye/Bilezik', subType: '', modelId: '', ayar: '', sira: '', uzunluk: '' });
+    this.result = null;
+  }
+
+  openOrderModal(): void {
+    if (!this.result) {
+      this.notificationService.showError('Önce hesaplama yapın');
+      return;
+    }
+    this.showOrderModal = true;
+  }
+
+  closeOrderModal(): void {
+    this.showOrderModal = false;
+    this.customerControl.reset();
+  }
+
+  saveAsOrder(): void {
+    if (!this.customerControl.value || !this.result) {
+      this.notificationService.showError('Lütfen müşteri seçin');
+      return;
+    }
+    this.isSavingOrder = true;
+    const orderData = {
+      customerId: this.customerControl.value,
+      calculationIds: [],
+      note: `${this.calculationForm.get('productType')?.value} - ${this.calculationForm.get('modelId')?.value} - ${this.calculationForm.get('ayar')?.value}K - ${this.result.fiyat} TL`,
+      subtotal: this.result.fiyat,
+      total: this.result.fiyat,
+      status: 'bekliyor',
+      productType: this.calculationForm.get('productType')?.value,
+      modelName: this.models.find(m => m.id === this.calculationForm.get('modelId')?.value)?.modelTipi || '',
+      purity: this.calculationForm.get('ayar')?.value,
+      calculationDetails: this.result,
+      goldPrice: this.goldPrice?.selling || 0
+    };
+    this.orderService.createOrder(orderData).subscribe({
+      next: () => {
+        this.notificationService.showSuccess('Sipariş oluşturuldu');
+        this.closeOrderModal();
+        this.result = null;
+        this.customerControl.reset();
+        this.isSavingOrder = false;
+      },
+      error: () => {
+        this.notificationService.showError('Sipariş oluşturulamadı');
+        this.isSavingOrder = false;
+      }
+    });
+  }
+
+  formatPrice(val: number): string {
+    return val ? val.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 2 }) : '₺0,00';
+  }
+
+  formatDate(date: Date | string): string {
+    const d = new Date(date);
+    return d.toLocaleDateString('tr-TR') + ' ' + d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
   }
 }

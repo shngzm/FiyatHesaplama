@@ -1,0 +1,77 @@
+<div class="report-container">
+  <div class="report-header">
+    <h2>📊 Kullanıcı Aktivite Raporu</h2>
+  </div>
+
+  <div class="filter-card">
+    <h3>Filtrele</h3>
+    <div class="filter-row">
+      <div class="form-group">
+        <label>Başlangıç Tarihi</label>
+        <input type="date" [(ngModel)]="startDate" class="form-control">
+      </div>
+      
+      <div class="form-group">
+        <label>Bitiş Tarihi</label>
+        <input type="date" [(ngModel)]="endDate" class="form-control">
+      </div>
+      
+      <div class="form-group">
+        <label>İşlem Tipi</label>
+        <select [(ngModel)]="selectedAction" class="form-control">
+          <option *ngFor="let opt of actionOptions" [value]="opt.value">{{ opt.label }}</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label>&nbsp;</label>
+        <button class="btn btn-primary" (click)="applyFilters()">🔍 Filtrele</button>
+        <button class="btn btn-secondary" (click)="clearFilters()">🔄 Temizle</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-card" *ngIf="statistics">
+    <h3>İstatistikler</h3>
+    <div class="stats-grid">
+      <div class="stat-item">
+        <span class="stat-label">Toplam İşlem</span>
+        <span class="stat-value">{{ statistics.total }}</span>
+      </div>
+      <div class="stat-item" *ngFor="let action of getStatKeys(statistics.byAction)">
+        <span class="stat-label">{{ getActionLabel(action) }}</span>
+        <span class="stat-value">{{ statistics.byAction[action] }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <h3>Aktivite Logları</h3>
+    <div *ngIf="loading" class="loading">Yükleniyor...</div>
+    <table class="data-table" *ngIf="!loading && logs.length > 0">
+      <thead>
+        <tr>
+          <th>Tarih</th>
+          <th>Kullanıcı</th>
+          <th>İşlem</th>
+          <th>Durum</th>
+          <th>IP</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let log of logs">
+          <td>{{ formatDate(log.timestamp) }}</td>
+          <td>{{ log.username }}</td>
+          <td>{{ getActionLabel(log.action) }}</td>
+          <td>
+            <span class="badge" [class.badge-success]="log.statusCode < 300" [class.badge-error]="log.statusCode >= 400">
+              {{ log.statusCode }}
+            </span>
+          </td>
+          <td>{{ log.ip }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <div *ngIf="!loading && logs.length === 0" class="no-data">Aktivite bulunamadı</div>
+  </div>
+</div>

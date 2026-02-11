@@ -1,7 +1,8 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import { DynamoDBDocumentClient, PutCommand, ScanCommand } from '@aws-sdk/lib-dynamodb';
-import ddbDocClient from '../config/dynamodb.js';
+import { CreateTableCommand, ListTablesCommand } from '@aws-sdk/client-dynamodb';
+import ddbDocClient, { client, TABLES } from '../config/dynamodb.js';
 
 const router = express.Router();
 
@@ -81,6 +82,153 @@ router.post('/admin', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to initialize admin user',
+      error: error.message
+    });
+  }
+});
+
+// Create all DynamoDB tables (one-time setup)
+router.post('/tables', async (req, res) => {
+  try {
+    console.log('[INIT] Creating DynamoDB tables...');
+    
+    // List existing tables
+    const listCommand = new ListTablesCommand({});
+    const existingTables = await client.send(listCommand);
+    const tableNames = existingTables.TableNames || [];
+    
+    const tablesToCreate = [
+      {
+        name: TABLES.USERS,
+        config: {
+          TableName: TABLES.USERS,
+          KeySchema: [{ AttributeName: 'id', KeyType: 'HASH' }],
+          AttributeDefinitions: [
+            { AttributeName: 'id', AttributeType: 'S' },
+            { AttributeName: 'username', AttributeType: 'S' }
+          ],
+          GlobalSecondaryIndexes: [{
+            IndexName: 'UsernameIndex',
+            KeySchema: [{ AttributeName: 'username', KeyType: 'HASH' }],
+            Projection: { ProjectionType: 'ALL' },
+            ProvisionedThroughput: { ReadCapacityUnits: 5, WriteCapacityUnits: 5 }
+          }],
+          BillingMode: 'PAY_PER_REQUEST'
+        }
+      },
+      {
+        name: TABLES.MODELS,
+        config: {
+          TableName: TABLES.MODELS,
+          KeySchema: [{ AttributeName: 'id', KeyType: 'HASH' }],
+          AttributeDefinitions: [{ AttributeName: 'id', AttributeType: 'S' }],
+          BillingMode: 'PAY_PER_REQUEST'
+        }
+      },
+      {
+        name: TABLES.PRODUCTS,
+        config: {
+          TableName: TABLES.PRODUCTS,
+          KeySchema: [{ AttributeName: 'id', KeyType: 'HASH' }],
+          AttributeDefinitions: [
+            { AttributeName: 'id', AttributeType: 'S' },
+            { AttributeName: 'modelId', AttributeType: 'S' }
+          ],
+          GlobalSecondaryIndexes: [{
+            IndexName: 'ModelIdIndex',
+            KeySchema: [{ AttributeName: 'modelId', KeyType: 'HASH' }],
+            Projection: { ProjectionType: 'ALL' },
+            ProvisionedThroughput: { ReadCapacityUnits: 5, WriteCapacityUnits: 5 }
+          }],
+          BillingMode: 'PAY_PER_REQUEST'
+        }
+      },
+      {
+        name: TABLES.GOLD_PRICES,
+        config: {
+          TableName: TABLES.GOLD_PRICES,
+          KeySchema: [{ AttributeName: 'id', KeyType: 'HASH' }],
+          AttributeDefinitions: [{ AttributeName: 'id', AttributeType: 'S' }],
+          BillingMode: 'PAY_PER_REQUEST'
+        }
+      },
+      {
+        name: TABLES.CUSTOMERS,
+        config: {
+          TableName: TABLES.CUSTOMERS,
+          KeySchema: [{ AttributeName: 'id', KeyType: 'HASH' }],
+          AttributeDefinitions: [{ AttributeName: 'id', AttributeType: 'S' }],
+          BillingMode: 'PAY_PER_REQUEST'
+        }
+      },
+      {
+        name: TABLES.ORDERS,
+        config: {
+          TableName: TABLES.ORDERS,
+          KeySchema: [{ AttributeName: 'id', KeyType: 'HASH' }],
+          AttributeDefinitions: [
+            { AttributeName: 'id', AttributeType: 'S' },
+            { AttributeName: 'customerId', AttributeType: 'S' }
+          ],
+          GlobalSecondaryIndexes: [{
+            IndexName: 'CustomerIdIndex',
+            KeySchema: [{ AttributeName: 'customerId', KeyType: 'HASH' }],
+            Projection: { ProjectionType: 'ALL' },
+            ProvisionedThroughput: { ReadCapacityUnits: 5, WriteCapacityUnits: 5 }
+          }],
+          BillingMode: 'PAY_PER_REQUEST'
+        }
+      },
+      {
+        name: TABLES.ACTIVITY_LOGS,
+        config: {
+          TableName: TABLES.ACTIVITY_LOGS,
+          KeySchema: [{ AttributeName: 'id', KeyType: 'HASH' }],
+          AttributeDefinitions: [
+            { AttributeName: 'id', AttributeType: 'S' },
+            { AttributeName: 'userId', AttributeType: 'S' },
+            { AttributeName: 'timestamp', AttributeType: 'S' }
+          ],
+          GlobalSecondaryIndexes: [{
+            IndexName: 'UserIdIndex',
+            KeySchema: [
+              { AttributeName: 'userId', KeyType: 'HASH' },
+              { AttributeName: 'timestamp', KeyType: 'RANGE' }
+            ],
+            Projection: { ProjectionType: 'ALL' },
+            ProvisionedThroughput: { ReadCapacityUnits: 5, WriteCapacityUnits: 5 }
+          }],
+          BillingMode: 'PAY_PER_REQUEST'
+        }
+      }
+    ];
+    
+    const results = [];
+    
+    for (const table of tablesToCreate) {
+      if (tableNames.includes(table.name)) {
+        console.log(`[INIT] Table ${table.name} already exists`);
+        results.push({ table: table.name, status: 'exists' });
+      } else {
+        console.log(`[INIT] Creating table ${table.name}...`);
+        const command = new CreateTableCommand(table.config);
+        await client.send(command);
+        results.push({ table: table.name, status: 'created' });
+        console.log(`[INIT] Table ${table.name} created successfully`);
+      }
+    }
+    
+    res.json({
+      success: true,
+      message: 'DynamoDB tables initialized',
+      results
+    });
+    
+  } catch (error) {
+    console.error('[INIT TABLES ERROR]', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to initialize tables',
       error: error.message
     });
   }

@@ -38,6 +38,11 @@ export class CalculationService {
       throw new Error('Model bulunamadı');
     }
 
+    // Güvenli değerler
+    const birimCmTel = product.birimCmTel ?? 0;
+    const digerAgirliklar = product.digerAgirliklar ?? 0;
+    const kesilenParca = product.kesilenParca ?? 0;
+
     // Calculate weight based on product type
     let sonuc: number;
     let formula: string;
@@ -49,19 +54,19 @@ export class CalculationService {
       }
       sonuc = this.calculateKolyeBilezik(
         input.uzunluk,
-        product.birimCmTel,
-        product.digerAgirliklar,
-        product.kesilenParca
+        birimCmTel,
+        digerAgirliklar,
+        kesilenParca
       );
-      formula = `((${input.uzunluk} - ${product.kesilenParca}) * ${product.birimCmTel}) + ${product.digerAgirliklar}`;
+      formula = `((${input.uzunluk} - ${kesilenParca}) * ${birimCmTel}) + ${digerAgirliklar}`;
     } else {
       // Yüzük/Küpe formula: (Sıra * 1cm Tel) + Diğer Ağırlıklar
       sonuc = this.calculateYuzukKupe(
         input.sira,
-        product.birimCmTel,
-        product.digerAgirliklar
+        birimCmTel,
+        digerAgirliklar
       );
-      formula = `(${input.sira} * ${product.birimCmTel}) + ${product.digerAgirliklar}`;
+      formula = `(${input.sira} * ${birimCmTel}) + ${digerAgirliklar}`;
     }
 
     const result: CalculationResult = {

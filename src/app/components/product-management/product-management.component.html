@@ -6,13 +6,17 @@
   <div class="form-card">
     <h3>Yeni Ürün Ekle</h3>
     <form [formGroup]="productForm" (ngSubmit)="onSubmit()">
+      <!-- Ürün Tipi Seçimi -->
       <div class="form-row">
         <div class="form-group">
-          <label for="modelId">Model *</label>
-          <select id="modelId" formControlName="modelId" class="form-control">
-            <option value="">Seçiniz</option>
-            <option *ngFor="let model of models" [value]="model.id">{{ model.modelTipi }}</option>
+          <label for="productType">Ürün Tipi *</label>
+          <select id="productType" formControlName="productType" class="form-control">
+            <option *ngFor="let opt of productTypeOptions" [value]="opt.value">{{ opt.label }}</option>
           </select>
+          <small class="form-help">
+            <span *ngIf="isKolyeBilezik">Kolye/Bilezik için model ve ölçüler gerekli</span>
+            <span *ngIf="isYuzukKupe">Yüzük/Küpe için sadece ayar, gram ve işçilik gerekli</span>
+          </small>
         </div>
 
         <div class="form-group">
@@ -24,74 +28,102 @@
         </div>
 
         <div class="form-group">
-          <label for="sira">Sıra *</label>
-          <select id="sira" formControlName="sira" class="form-control">
-            <option value="">Seçiniz</option>
-            <option *ngFor="let sira of siraOptions" [value]="sira">{{ sira }}</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label for="birimCmTel">1 cm Tel (g) *</label>
-          <input 
-            type="number" 
-            id="birimCmTel" 
-            formControlName="birimCmTel"
-            class="form-control"
-            placeholder="0.00"
-            step="0.01"
-          >
-        </div>
-
-        <div class="form-group">
-          <label for="kesilenParca">Kesilen Parça (cm) *</label>
-          <input 
-            type="number" 
-            id="kesilenParca" 
-            formControlName="kesilenParca"
-            class="form-control"
-            placeholder="0.00"
-            step="0.01"
-          >
-        </div>
-
-        <div class="form-group">
-          <label for="digerAgirliklar">Diğer Ağırlıklar (g) *</label>
-          <input 
-            type="number" 
-            id="digerAgirliklar" 
-            formControlName="digerAgirliklar"
-            class="form-control"
-            placeholder="Toka, diş vb."
-            step="0.01"
-          >
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label for="iscilik">İşçilik (milyem) *</label>
+          <label for="iscilik">İşçilik (Milyem) *</label>
           <input 
             type="number" 
             id="iscilik" 
             formControlName="iscilik"
             class="form-control"
-            placeholder="Örn: 250"
+            placeholder="örn: 250"
             step="1"
           >
         </div>
+      </div>
 
+      <!-- Kolye/Bilezik için alanlar -->
+      <div *ngIf="isKolyeBilezik">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="modelId">Model *</label>
+            <select id="modelId" formControlName="modelId" class="form-control">
+              <option value="">Seçiniz</option>
+              <option *ngFor="let model of models" [value]="model.id">{{ model.modelTipi }}</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="sira">Sıra *</label>
+            <select id="sira" formControlName="sira" class="form-control">
+              <option value="">Seçiniz</option>
+              <option *ngFor="let sira of siraOptions" [value]="sira">{{ sira }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="birimCmTel">1 cm Tel (g) *</label>
+            <input 
+              type="number" 
+              id="birimCmTel" 
+              formControlName="birimCmTel"
+              class="form-control"
+              placeholder="0.00"
+              step="0.01"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="kesilenParca">Kesilen Parça (cm) *</label>
+            <input 
+              type="number" 
+              id="kesilenParca" 
+              formControlName="kesilenParca"
+              class="form-control"
+              placeholder="0.00"
+              step="0.01"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="digerAgirliklar">Diğer Ağırlıklar (g) *</label>
+            <input 
+              type="number" 
+              id="digerAgirliklar" 
+              formControlName="digerAgirliklar"
+              class="form-control"
+              placeholder="Toka, diş vb."
+              step="0.01"
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- Yüzük/Küpe için alanlar -->
+      <div *ngIf="isYuzukKupe">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="gram">Gram *</label>
+            <input 
+              type="number" 
+              id="gram" 
+              formControlName="gram"
+              class="form-control"
+              placeholder="0.00"
+              step="0.01"
+            >
+            <small class="form-help">Ürünün toplam gramı</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
         <div class="form-group">
           <label>&nbsp;</label>
           <button type="submit" class="btn btn-primary" [disabled]="productForm.invalid">
             ✅ Ürün Ekle
           </button>
         </div>
-      </div>
-      <div class="form-row">
-        <small class="form-hint">Milyem cinsinden işçilik değeri (örn: 250)</small>
       </div>
     </form>
   </div>
@@ -101,9 +133,11 @@
     <table class="data-table" *ngIf="products.length > 0; else noProducts">
       <thead>
         <tr>
+          <th>Tip</th>
           <th>Model</th>
           <th>Ayar</th>
           <th>Sıra</th>
+          <th>Gram</th>
           <th>1 cm Tel</th>
           <th>Kesilen</th>
           <th>Diğer Ağ.</th>
@@ -113,12 +147,18 @@
       </thead>
       <tbody>
         <tr *ngFor="let product of products">
-          <td>{{ product.modelTipi }}</td>
-          <td>{{ product.ayar }}</td>
-          <td>{{ product.sira }}</td>
-          <td>{{ product.birimCmTel | number:'1.2-2' }} g</td>
-          <td>{{ product.kesilenParca | number:'1.2-2' }} g</td>
-          <td>{{ product.digerAgirliklar | number:'1.2-2' }} g</td>
+          <td>
+            <span *ngIf="product.productType === 'kolye-bilezik'" class="badge badge-default">Kolye/Bilezik</span>
+            <span *ngIf="product.productType === 'yuzuk'" class="badge badge-info">Yüzük</span>
+            <span *ngIf="product.productType === 'kupe'" class="badge badge-success">Küpe</span>
+          </td>
+          <td>{{ product.modelTipi || '-' }}</td>
+          <td><span class="badge badge-{{ product.ayar }}">{{ product.ayar }}</span></td>
+          <td>{{ product.sira || '-' }}</td>
+          <td>{{ product.gram ? (product.gram | number:'1.2-2') + ' g' : '-' }}</td>
+          <td>{{ product.birimCmTel ? (product.birimCmTel | number:'1.2-2') + ' g' : '-' }}</td>
+          <td>{{ product.kesilenParca ? (product.kesilenParca | number:'1.2-2') + ' cm' : '-' }}</td>
+          <td>{{ product.digerAgirliklar ? (product.digerAgirliklar | number:'1.2-2') + ' g' : '-' }}</td>
           <td>{{ product.iscilik }} ‰</td>
           <td>
             <button class="btn btn-sm btn-danger" (click)="deleteProduct(product)">🗑️ Sil</button>

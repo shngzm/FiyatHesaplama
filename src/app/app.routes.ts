@@ -8,6 +8,9 @@ import { ScrapCalculatorComponent } from './components/scrap-calculator/scrap-ca
 import { GramPriceCalculatorComponent } from './components/gram-price-calculator/gram-price-calculator.component';
 import { GoldPriceManagementComponent } from './components/admin/gold-price-management/gold-price-management.component';
 import { UserManagementComponent } from './components/admin/user-management/user-management.component';
+import { CustomerManagementComponent } from './components/customer-management/customer-management.component';
+import { OrderManagementComponent } from './components/order-management/order-management.component';
+import { ActivityReportComponent } from './components/activity-report/activity-report.component';
 import { authGuard } from './guards/auth.guard';
 import { adminGuard } from './guards/admin.guard';
 import { adminManagerGuard } from './guards/admin-manager.guard';
@@ -53,6 +56,21 @@ export const routes: Routes = [
     path: 'admin/users', 
     component: UserManagementComponent,
     canActivate: [authGuard]
+  },
+  { 
+    path: 'customers', 
+    component: CustomerManagementComponent,
+    canActivate: [authGuard]
+  },
+  { 
+    path: 'orders', 
+    component: OrderManagementComponent,
+    canActivate: [authGuard]
+  },
+  { 
+    path: 'activity-report', 
+    component: ActivityReportComponent,
+    canActivate: [authGuard, adminGuard]
   },
   { path: '**', redirectTo: 'login' }
 ];

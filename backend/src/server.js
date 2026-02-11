@@ -12,6 +12,12 @@ import modelRoutes from './routes/models.js';
 import productRoutes from './routes/products.js';
 import goldPriceRoutes from './routes/goldPrice.js';
 import initRoutes from './routes/init.js';
+import customerRoutes from './routes/customers.js';
+import orderRoutes from './routes/orders.js';
+import activityLogRoutes from './routes/activityLogs.js';
+
+// Import middleware
+import { activityLogger } from './middleware/activityLogger.js';
 
 dotenv.config();
 
@@ -19,8 +25,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
-// Trust proxy for Lambda/API Gateway
-app.set('trust proxy', true);
+// Trust proxy kapalı (güvenlik için)
+app.set('trust proxy', false);
 
 // Security middleware
 app.use(helmet());
@@ -82,11 +88,17 @@ app.use((req, res, next) => {
   next();
 });
 
+// Activity logging middleware (before routes)
+app.use(activityLogger);
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/models', modelRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/gold-price', goldPriceRoutes);
+app.use('/api/customers', customerRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/activity-logs', activityLogRoutes);
 app.use('/api/init', initRoutes);
 
 // Health check
@@ -107,21 +119,19 @@ app.use((req, res) => {
   });
 });
 
-// Error handling middleware
+// Error handling middleware (must be after routes)
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ 
-    success: false,
-    message: 'Something went wrong!',
-    error: NODE_ENV === 'development' ? err.message : undefined
+  console.error('[ERROR]', {
+    message: err.message,
+    stack: err.stack,
+    path: req.path,
+    method: req.method
   });
-});
-
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({ 
+  
+  res.status(err.status || 500).json({ 
     success: false,
-    message: 'Route not found' 
+    message: err.message || 'Something went wrong!',
+    error: NODE_ENV === 'development' ? err.stack : undefined
   });
 });
 

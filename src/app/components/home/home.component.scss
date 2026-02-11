@@ -88,6 +88,60 @@
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
       }
+
+      .btn-report {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        background-color: #9C27B0;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-weight: 600;
+
+        &:hover {
+          background-color: #7B1FA2;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+      }
+
+      .btn-customer {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        background-color: #2196F3;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-weight: 600;
+
+        &:hover {
+          background-color: #1976D2;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+      }
+
+      .btn-order {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        background-color: #FF9800;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-weight: 600;
+
+        &:hover {
+          background-color: #F57C00;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+      }
     }
   }
 }

@@ -1,0 +1,94 @@
+<div class="order-management">
+  <div class="container">
+    <h1>Sipariş Yönetimi</h1>
+
+    <!-- Filters -->
+    <div class="filters-card">
+      <h2>Filtrele</h2>
+      <div class="filters-row">
+        <div class="filter-group">
+          <label for="customerFilter">Müşteri</label>
+          <select id="customerFilter" [(ngModel)]="selectedCustomerId" (change)="onFilterChange()">
+            <option value="">Tüm Müşteriler</option>
+            <option *ngFor="let customer of customers" [value]="customer.id">
+              {{ customer.firstName }} {{ customer.lastName }}
+            </option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="statusFilter">Durum</label>
+          <select id="statusFilter" [(ngModel)]="selectedStatus" (change)="onFilterChange()">
+            <option value="">Tüm Durumlar</option>
+            <option *ngFor="let status of statuses" [value]="status">
+              {{ getStatusLabel(status) }}
+            </option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Orders List -->
+    <div class="orders-list">
+      <h2>Siparişler ({{ orders.length }})</h2>
+
+      <div *ngIf="isLoading" class="loading">Yükleniyor...</div>
+
+      <div *ngIf="!isLoading && orders.length === 0" class="no-data">
+        Henüz sipariş bulunmamaktadır.
+      </div>
+
+      <div *ngIf="!isLoading && orders.length > 0" class="orders-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Sipariş No</th>
+              <th>Müşteri</th>
+              <th>Ürün Tipi</th>
+              <th>Model</th>
+              <th>Ayar</th>
+              <th>Tutar</th>
+              <th>Durum</th>
+              <th>Tarih</th>
+              <th>İşlemler</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let order of orders">
+              <td>{{ order.orderNumber }}</td>
+              <td>{{ order.customerName }}</td>
+              <td>
+                <span class="badge badge-info">
+                  {{ order.productType === 'kolye-bilezik' ? 'Kolye/Bilezik' : 'Yüzük/Küpe' }}
+                </span>
+              </td>
+              <td>{{ order.modelName }}</td>
+              <td>{{ order.purity }}</td>
+              <td class="amount">{{ formatCurrency(order.total) }}</td>
+              <td>
+                <span [class]="'badge ' + getStatusBadgeClass(order.status)">
+                  {{ statusLabels[order.status] }}
+                </span>
+              </td>
+              <td>{{ order.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+              <td class="actions">
+                <select 
+                  [value]="order.status" 
+                  (change)="updateOrderStatus(order, $any($event.target).value)"
+                  class="status-select"
+                >
+                  <option *ngFor="let status of statuses" [value]="status">
+                    {{ getStatusLabel(status) }}
+                  </option>
+                </select>
+                <button class="btn btn-sm btn-delete" (click)="deleteOrder(order)">
+                  Sil
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

@@ -37,14 +37,18 @@ export const TABLES = {
   USERS: process.env.USERS_TABLE || 'GramFiyat-Users',
   MODELS: process.env.MODELS_TABLE || 'GramFiyat-Models',
   PRODUCTS: process.env.PRODUCTS_TABLE || 'GramFiyat-Products',
-  GOLD_PRICES: process.env.GOLD_PRICES_TABLE || 'GramFiyat-GoldPrices'
+  GOLD_PRICES: process.env.GOLD_PRICES_TABLE || 'GramFiyat-GoldPrices',
+  CUSTOMERS: process.env.CUSTOMERS_TABLE || 'GramFiyat-Customers',
+  ORDERS: process.env.ORDERS_TABLE || 'GramFiyat-Orders',
+  ACTIVITY_LOGS: process.env.ACTIVITY_LOGS_TABLE || 'GramFiyat-ActivityLogs'
 };
 
 console.log('✅ DynamoDB Client configured');
 console.log('📍 Region:', dynamoDBClientConfig.region);
+console.log('📊 Tables:', Object.keys(TABLES).join(', '));
 if (process.env.USE_LOCAL_DYNAMODB === 'true') {
   console.log('🏠 Using Local DynamoDB:', dynamoDBClientConfig.endpoint);
 }
 
-export { client, ddbDocClient };
+export { client, ddbDocClient as docClient };
 export default ddbDocClient;

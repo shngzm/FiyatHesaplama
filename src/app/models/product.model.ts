@@ -1,14 +1,23 @@
 export type Ayar = 8 | 10 | 14 | 18 | 21 | 22;
+export type ProductType = 'kolye-bilezik' | 'yuzuk' | 'kupe';
 
 export interface Product {
   id: string;
-  modelId: string;
+  productType: ProductType; // Ürün tipi: kolye-bilezik, yuzuk, kupe
   ayar: Ayar;
-  sira: number;
-  birimCmTel: number;
-  kesilenParca: number;
-  digerAgirliklar: number;
-  iscilik: number; // Milyem cinsinden işçilik (örn: 250)
+  
+  // Kolye/Bilezik için (productType === 'kolye-bilezik')
+  modelId?: string;
+  sira?: number;
+  birimCmTel?: number;
+  kesilenParca?: number;
+  digerAgirliklar?: number;
+  
+  // Yüzük/Küpe için (productType === 'yuzuk' || productType === 'kupe')
+  gram?: number; // Ürün gramı
+  
+  iscilik: number; // Milyem cinsinden işçilik (örn: 250) - Her ürün için gerekli
+  
   createdAt: Date;
   updatedAt?: Date;
   
@@ -17,23 +26,31 @@ export interface Product {
 }
 
 export interface CreateProductDto {
-  modelId: string;
+  productType: ProductType;
   ayar: Ayar;
-  sira: number;
-  birimCmTel: number;
-  kesilenParca: number;
-  digerAgirliklar: number;
   iscilik: number;
-}
-
-export interface UpdateProductDto {
+  
+  // Kolye/Bilezik için
   modelId?: string;
-  ayar?: Ayar;
   sira?: number;
   birimCmTel?: number;
   kesilenParca?: number;
   digerAgirliklar?: number;
+  
+  // Yüzük/Küpe için
+  gram?: number;
+}
+
+export interface UpdateProductDto {
+  productType?: ProductType;
+  ayar?: Ayar;
   iscilik?: number;
+  modelId?: string;
+  sira?: number;
+  birimCmTel?: number;
+  kesilenParca?: number;
+  digerAgirliklar?: number;
+  gram?: number;
 }
 
 export interface ProductWithModel extends Product {

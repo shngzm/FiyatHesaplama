@@ -10,9 +10,9 @@ export interface CalculationHistory {
   ayar: Ayar;
   sira: number;
   uzunluk?: number;          // Optional: not used for Yüzük/Küpe
-  birimCmTel: number;
-  digerAgirliklar: number;
-  kesilenParca: number;
+  birimCmTel?: number;       // Optional: only for Kolye/Bilezik
+  digerAgirliklar?: number;  // Optional: only for Kolye/Bilezik
+  kesilenParca?: number;     // Optional: only for Kolye/Bilezik
   sonuc: number;
   fiyat?: number;           // Calculated price in TL
   bozmaFiyati?: number;     // Scrap price in TL
@@ -43,8 +43,8 @@ export interface CalculationResult {
     productType: ProductType;  // NEW: Include product type in breakdown
     uzunluk?: number;
     sira: number;              // NEW: Always include sira
-    birimCmTel: number;
-    digerAgirliklar: number;
-    kesilenParca: number;
+    birimCmTel?: number;       // Optional: only for Kolye/Bilezik
+    digerAgirliklar?: number;  // Optional: only for Kolye/Bilezik
+    kesilenParca?: number;     // Optional: only for Kolye/Bilezik
   };
 }

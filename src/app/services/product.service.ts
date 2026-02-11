@@ -19,7 +19,8 @@ export class ProductService {
   private modelService = inject(ModelService);
   private apiUrl = `${environment.apiUrl}/products`;
   
-  private productsSubject = new BehaviorSubject<Product[]>([]);
+  // Make productsSubject public for advanced filtering
+  public productsSubject = new BehaviorSubject<Product[]>([]);
   public products$ = this.productsSubject.asObservable();
 
   // Products with model information
@@ -52,6 +53,11 @@ export class ProductService {
         });
       })
     );
+  }
+
+  // Get products by type
+  getProductsByType(productType: string): Product[] {
+    return this.productsSubject.value.filter(p => p.productType === productType);
   }
 
   private async loadProducts(): Promise<void> {
@@ -186,7 +192,7 @@ export class ProductService {
     const products = this.productsSubject.value.filter(
       p => p.modelId === modelId && p.ayar === ayar
     );
-    const siras = products.map(p => p.sira);
+    const siras = products.map(p => p.sira).filter((s): s is number => s !== undefined);
     return siras.sort((a, b) => a - b);
   }
 

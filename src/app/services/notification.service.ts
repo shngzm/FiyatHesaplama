@@ -21,8 +21,18 @@ export class NotificationService {
     this.show('success', message, duration);
   }
 
+  // Alias for success
+  showSuccess(message: string, duration: number = 3000): void {
+    this.success(message, duration);
+  }
+
   error(message: string, duration: number = 5000): void {
     this.show('error', message, duration);
+  }
+
+  // Alias for error
+  showError(message: string, duration: number = 5000): void {
+    this.error(message, duration);
   }
 
   warning(message: string, duration: number = 4000): void {

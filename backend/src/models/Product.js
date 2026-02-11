@@ -4,6 +4,36 @@ import ddbDocClient, { TABLES } from '../config/dynamodb.js';
 
 export default {
   async create(productData) {
+    // Validate required fields
+    if (!productData.productType) {
+      throw new Error('productType alanı zorunludur');
+    }
+    if (!productData.ayar) {
+      throw new Error('ayar alanı zorunludur');
+    }
+    if (productData.iscilik === undefined || productData.iscilik === null) {
+      throw new Error('iscilik alanı zorunludur');
+    }
+
+    // Validate conditional fields based on productType
+    if (productData.productType === 'kolye-bilezik') {
+      if (!productData.modelId) {
+        throw new Error('Kolye/Bilezik için modelId zorunludur');
+      }
+      if (!productData.sira) {
+        throw new Error('Kolye/Bilezik için sıra zorunludur');
+      }
+      if (!productData.birimCmTel) {
+        throw new Error('Kolye/Bilezik için birimCmTel zorunludur');
+      }
+    } else if (productData.productType === 'yuzuk' || productData.productType === 'kupe') {
+      if (!productData.gram) {
+        throw new Error('Yüzük/Küpe için gram zorunludur');
+      }
+    } else {
+      throw new Error('Geçersiz productType. Geçerli değerler: kolye-bilezik, yuzuk, kupe');
+    }
+
     const product = {
       id: uuidv4(),
       ...productData,

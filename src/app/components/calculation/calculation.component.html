@@ -23,6 +23,15 @@
         </small>
       </div>
 
+      <!-- NEW: SubType Selection -->
+      <div class="form-group">
+        <label for="subType">Alt Tip</label>
+        <select id="subType" formControlName="subType" class="form-control">
+          <option *ngFor="let option of subTypeOptions" [value]="option.value">{{ option.label }}</option>
+        </select>
+        <small class="form-help">Hesaplamada kullanılacak ürün tipini seçin</small>
+      </div>
+
       <div class="form-group">
         <label for="model">Model</label>
         <select id="model" formControlName="modelId" class="form-control">
@@ -132,6 +141,44 @@
             <span class="bozma-value price">{{ formatPrice(result.bozmaFiyati) }}</span>
           </div>
         </div>
+      </div>
+
+      <!-- Save as Order Button -->
+      <div class="order-actions">
+        <button type="button" class="btn btn-success" (click)="openOrderModal()">
+          📋 Siparişe Ekle
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Modal -->
+  <div *ngIf="showOrderModal" class="modal-overlay" (click)="closeOrderModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Müşteri Seç</h3>
+        <button class="btn-close" (click)="closeOrderModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="customer">Müşteri</label>
+          <select id="customer" [formControl]="customerControl" class="form-control">
+            <option value="">Müşteri seçiniz</option>
+            <option *ngFor="let customer of customers" [value]="customer.id">
+              {{ customer.firstName }} {{ customer.lastName }} - {{ customer.phone }}
+            </option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeOrderModal()">İptal</button>
+        <button 
+          class="btn btn-primary" 
+          (click)="saveAsOrder()" 
+          [disabled]="!customerControl.value || isSavingOrder"
+        >
+          {{ isSavingOrder ? 'Kaydediliyor...' : 'Kaydet' }}
+        </button>
       </div>
     </div>
   </div>

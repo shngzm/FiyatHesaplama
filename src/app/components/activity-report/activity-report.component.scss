@@ -1,0 +1,51 @@
+.report-container {
+  padding: 2rem;
+
+  .filter-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: flex-end;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+  }
+
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    background: #f5f5f5;
+    border-radius: 8px;
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: #666;
+    }
+
+    .stat-value {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #2196f3;
+    }
+  }
+
+  .badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+
+    &.badge-success {
+      background: #4caf50;
+      color: white;
+    }
+
+    &.badge-error {
+      background: #f44336;
+      color: white;
+    }
+  }
+}

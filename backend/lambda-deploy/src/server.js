@@ -19,8 +19,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
-// Trust proxy for Lambda/API Gateway
-app.set('trust proxy', true);
+// Trust proxy kapalı (güvenlik için)
+app.set('trust proxy', false);
 
 // Security middleware
 app.use(helmet());

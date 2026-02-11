@@ -16,17 +16,26 @@
     <div class="admin-section">
       <h3>⚙️ Yönetim Paneli</h3>
       <div class="admin-buttons">
+        <button class="btn btn-customer" routerLink="/customers">
+          👥 Müşteri Yönetimi
+        </button>
+        <button class="btn btn-order" routerLink="/orders">
+          📋 Sipariş Yönetimi
+        </button>
         <button *ngIf="isAdmin()" class="btn btn-admin" routerLink="/admin/models">
           📦 Model Yönetimi
         </button>
         <button *ngIf="isAdmin()" class="btn btn-admin" routerLink="/admin/products">
-          📋 Ürün Yönetimi
+          🏷️ Ürün Yönetimi
         </button>
         <button class="btn btn-admin" routerLink="/admin/gold-price">
           💰 Altın Kuru Yönetimi
         </button>
         <button *ngIf="isAdmin()" class="btn btn-admin" routerLink="/admin/users">
           👤 Kullanıcı Yönetimi
+        </button>
+        <button *ngIf="isAdmin()" class="btn btn-report" routerLink="/activity-report">
+          📊 Aktivite Raporu
         </button>
       </div>
     </div>
