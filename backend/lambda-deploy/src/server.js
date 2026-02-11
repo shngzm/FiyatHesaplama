@@ -49,11 +49,18 @@ const allowedOrigins = [
 
 const corsOptions = {
   origin: function (origin, callback) {
+    // Lambda/API Gateway - allow all origins (API Gateway handles CORS)
+    if (process.env.AWS_LAMBDA_FUNCTION_NAME) {
+      return callback(null, true);
+    }
+    
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
+    
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
+      console.log('[CORS] Rejected origin:', origin);
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -99,36 +106,42 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: 'Route not found'
-  });
-});
-
-// Error handling middleware
+// Error handling middleware (MUST be last)
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ 
-    success: false,
-    message: 'Something went wrong!',
-    error: NODE_ENV === 'development' ? err.message : undefined
+  console.error('[ERROR]', {
+    message: err.message,
+    stack: err.stack,
+    url: req.url,
+    method: req.method
   });
+
+  // Ensure response is sent
+  if (!res.headersSent) {
+    res.status(err.status || 500).json({ 
+      success: false,
+      message: err.message || 'Internal server error',
+      error: NODE_ENV === 'development' ? err.stack : undefined
+    });
+  }
 });
 
-// 404 handler
+// 404 handler (MUST be after error handler)
 app.use((req, res) => {
-  res.status(404).json({ 
-    success: false,
-    message: 'Route not found' 
-  });
+  if (!res.headersSent) {
+    res.status(404).json({ 
+      success: false,
+      message: 'Route not found',
+      path: req.url
+    });
+  }
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📍 Health check: http://localhost:${PORT}/api/health`);
-});
+// Only start server if not in Lambda environment
+if (!process.env.AWS_LAMBDA_FUNCTION_NAME) {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`📍 Health check: http://localhost:${PORT}/api/health`);
+  });
+}
 
 export default app;
