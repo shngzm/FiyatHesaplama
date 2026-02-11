@@ -6,7 +6,7 @@ frontend:
         - npm ci
     build:
       commands:
-        - npm run build:prod
+        - npm run build
   artifacts:
     baseDirectory: dist/fiyat-hesaplama/browser
     files:
@@ -14,23 +14,3 @@ frontend:
   cache:
     paths:
       - node_modules/**/*
-customHeaders:
-  - pattern: '**/*'
-    headers:
-      - key: 'Cache-Control'
-        value: 'public, max-age=31536000, immutable'
-      - key: 'Strict-Transport-Security'
-        value: 'max-age=31536000; includeSubDomains'
-      - key: 'X-Content-Type-Options'
-        value: 'nosniff'
-      - key: 'X-Frame-Options'
-        value: 'DENY'
-  - pattern: '/index.html'
-    headers:
-      - key: 'Cache-Control'
-        value: 'no-cache, no-store, must-revalidate'
-customRules:
-  - source: '/<*>'
-    target: '/index.html'
-    status: '200'
-    condition: null
