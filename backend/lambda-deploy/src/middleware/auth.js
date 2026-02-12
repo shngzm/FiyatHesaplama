@@ -54,3 +54,6 @@ export const requireAdminOrManager = (req, res, next) => {
   }
   next();
 };
+
+// Alias for backward compatibility
+export const authenticate = authenticateToken;

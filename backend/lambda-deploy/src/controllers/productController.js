@@ -44,31 +44,27 @@ export const getProductByModelAyarSira = async (req, res) => {
 
 export const createProduct = async (req, res) => {
   try {
-    // Validate required fields
-    const { modelId, ayar, sira, birimCmTel, kesilenParca, digerAgirliklar, iscilik } = req.body;
+    const { productType, modelId, ayar, sira } = req.body;
     
-    if (!modelId) {
-      return res.status(400).json({ success: false, message: 'Model ID is required' });
+    // Common validation
+    if (!productType) {
+      return res.status(400).json({ success: false, message: 'Product type is required' });
     }
     if (ayar === undefined || ayar === null) {
       return res.status(400).json({ success: false, message: 'Ayar is required' });
     }
-    if (sira === undefined || sira === null) {
-      return res.status(400).json({ success: false, message: 'Sıra is required' });
+    
+    // Kolye/Bilezik için ek validation
+    if (productType === 'Kolye/Bilezik' || productType === 'kolye-bilezik') {
+      if (!modelId) {
+        return res.status(400).json({ success: false, message: 'Model ID is required for Kolye/Bilezik' });
+      }
+      if (sira === undefined || sira === null) {
+        return res.status(400).json({ success: false, message: 'Sıra is required for Kolye/Bilezik' });
+      }
     }
-    if (birimCmTel === undefined || birimCmTel === null) {
-      return res.status(400).json({ success: false, message: 'Birim CM Tel is required' });
-    }
-    if (kesilenParca === undefined || kesilenParca === null) {
-      return res.status(400).json({ success: false, message: 'Kesilen Parça is required' });
-    }
-    if (digerAgirliklar === undefined || digerAgirliklar === null) {
-      return res.status(400).json({ success: false, message: 'Diğer Ağırlıklar is required' });
-    }
-    if (iscilik === undefined || iscilik === null) {
-      return res.status(400).json({ success: false, message: 'İşçilik is required' });
-    }
-
+    
+    // Yüzük/Küpe için modelId opsiyonel, sıra kullanılmaz
     console.log('Creating product with data:', req.body);
     const product = await Product.create(req.body);
     const populatedProduct = await Product.populate(product, 'modelId');

@@ -1,13 +1,13 @@
 {
   "projectName": "Gram Fiyat Hesaplama (Fiyathesaplama)",
-  "version": "2.1.0",
-  "lastUpdated": "2025-01-23",
+  "version": "2.1.1",
+  "lastUpdated": "2026-02-12",
   "projectProgress": {
     "overallStatus": "production-ready",
-    "currentPhase": "deployment-ready",
+    "currentPhase": "deploying-fixes",
     "completionPercentage": 100,
     "v1Status": "deployed-to-aws",
-    "v2Status": "tests-complete-packages-ready"
+    "v2Status": "model-filtering-fixes-ready"
   },
   "architecture": {
     "frontend": {

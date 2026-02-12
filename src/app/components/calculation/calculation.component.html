@@ -23,15 +23,6 @@
         </small>
       </div>
 
-      <!-- NEW: SubType Selection -->
-      <div class="form-group">
-        <label for="subType">Alt Tip</label>
-        <select id="subType" formControlName="subType" class="form-control">
-          <option *ngFor="let option of subTypeOptions" [value]="option.value">{{ option.label }}</option>
-        </select>
-        <small class="form-help">Hesaplamada kullanılacak ürün tipini seçin</small>
-      </div>
-
       <div class="form-group">
         <label for="model">Model</label>
         <select id="model" formControlName="modelId" class="form-control">
@@ -48,8 +39,9 @@
         </select>
       </div>
 
-      <div class="form-group">
-        <label for="sira">Sıra</label>
+      <!-- Sıra - sadece Kolye/Bilezik için -->
+      <div class="form-group" *ngIf="isKolyeBilezik">
+        <label for="sira">Sıra <span class="required">*</span></label>
         <select id="sira" formControlName="sira" class="form-control" [disabled]="siras.length === 0">
           <option value="">Seçiniz</option>
           <option *ngFor="let sira of siras" [value]="sira">{{ sira }}</option>

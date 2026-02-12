@@ -12,6 +12,9 @@ import modelRoutes from './routes/models.js';
 import productRoutes from './routes/products.js';
 import goldPriceRoutes from './routes/goldPrice.js';
 import initRoutes from './routes/init.js';
+import customerRoutes from './routes/customers.js';
+import orderRoutes from './routes/orders.js';
+import activityLogRoutes from './routes/activityLogs.js';
 
 dotenv.config();
 
@@ -19,8 +22,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
-// Trust proxy kapalı (güvenlik için)
-app.set('trust proxy', false);
+// Trust proxy - Lambda/API Gateway arkasında çalışırken true olmalı
+app.set('trust proxy', process.env.AWS_LAMBDA_FUNCTION_NAME ? true : false);
 
 // Security middleware
 app.use(helmet());
@@ -28,16 +31,21 @@ app.use(helmet());
 // Compression
 app.use(compression());
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: NODE_ENV === 'production' ? 100 : 1000, // limit each IP to 100 requests per windowMs in production
-  message: 'Too many requests from this IP, please try again later.',
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
-app.use('/api/', limiter);
+// Rate limiting (Lambda'da devre dışı - API Gateway throttling kullan)
+if (!process.env.AWS_LAMBDA_FUNCTION_NAME) {
+  const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: NODE_ENV === 'production' ? 100 : 1000,
+    message: 'Too many requests from this IP, please try again later.',
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+  
+  app.use('/api/', limiter);
+  console.log('[RATE-LIMIT] Rate limiter enabled (local development)');
+} else {
+  console.log('[RATE-LIMIT] Rate limiter disabled (Lambda - using API Gateway throttling)');
+}
 
 // CORS configuration
 const allowedOrigins = [
@@ -94,8 +102,9 @@ app.use('/api/auth', authRoutes);
 app.use('/api/models', modelRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/gold-price', goldPriceRoutes);
-app.use('/api/init', initRoutes);
-
+app.use('/api/init', initRoutes);app.use('/api/customers', customerRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/activity-logs', activityLogRoutes);
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ 

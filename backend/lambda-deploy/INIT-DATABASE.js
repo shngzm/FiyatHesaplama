@@ -182,37 +182,48 @@ const createTablesIfNotExist = async () => {
 };
 
 const createAdminUser = async () => {
-  console.log('👤 Admin kullanıcısı kontrol ediliyor...\n');
+  console.log('👤 Admin kullanıcısı oluşturuluyor...\n');
 
   try {
-    // Admin kullanıcısı var mı kontrol et
-    const existingAdmin = await User.findByUsername('mrc');
+    // Sabit admin ID kullan (varsa güncelle, yoksa oluştur)
+    const adminId = 'user-admin-mrc-001';
+    const hashedPassword = await bcrypt.hash('admin123', 10);
+    console.log('🔐 Password hashed for admin123');
     
-    if (existingAdmin) {
-      console.log('✅ Admin kullanıcısı zaten mevcut');
-      console.log('   Username: mrc');
-      console.log('   Role: admin');
-      return;
-    }
-
-    // Admin kullanıcısı oluştur
-    const hashedPassword = await bcrypt.hash('6161', 10);
-    
-    await User.create({
+    const adminUser = {
+      id: adminId,
       username: 'mrc',
       email: 'admin@gramfiyat.com',
       password: hashedPassword,
       fullName: 'Admin User',
       role: 'admin',
-      isActive: true
-    });
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
 
-    console.log('✅ Admin kullanıcısı oluşturuldu!');
+    // DynamoDB'ye direkt yaz (varsa üzerine yaz)
+    const { PutCommand } = await import('@aws-sdk/lib-dynamodb');
+    const { default: ddbDocClient } = await import('./src/config/dynamodb.js');
+    
+    console.log('💾 Writing admin user to DynamoDB...');
+    await ddbDocClient.send(new PutCommand({
+      TableName: TABLES.USERS,
+      Item: adminUser
+    }));
+
+    console.log('✅ Admin kullanıcısı başarıyla oluşturuldu!');
+    console.log('   ID:', adminUser.id);
     console.log('   Username: mrc');
-    console.log('   Password: 6161');
-    console.log('   Role: admin\n');
+    console.log('   Password: admin123');
+    console.log('   Role: admin');
+    console.log('   Hash:', hashedPassword.substring(0, 20) + '...');
+    console.log('');
   } catch (error) {
-    console.error('❌ Admin kullanıcısı oluşturulamadı:', error.message);
+    console.error('❌ Admin kullanıcısı oluşturulamadı:');
+    console.error('   Error:', error.message);
+    console.error('   Stack:', error.stack);
+    throw error;
   }
 };
 

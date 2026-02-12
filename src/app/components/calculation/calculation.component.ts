@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import { ProductService } from '../../services/product.service';
+import { ModelService } from '../../services/model.service';
 import { CalculationService } from '../../services/calculation.service';
 import { GoldPriceService } from '../../services/gold-price.service';
 import { NotificationService } from '../../services/notification.service';
@@ -10,6 +11,7 @@ import { CustomerService } from '../../services/customer.service';
 import { OrderService } from '../../services/order.service';
 import { GoldPrice } from '../../models/gold-price.model';
 import { Customer } from '../../models/customer.model';
+import { Model } from '../../models/model.model';
 
 @Component({
   selector: 'app-calculation',
@@ -22,8 +24,8 @@ import { Customer } from '../../models/customer.model';
 export class CalculationComponent implements OnInit, OnDestroy {
   calculationForm: FormGroup;
   productTypes = ['Kolye/Bilezik', 'Yüzük', 'Küpe'];
-  subTypeOptions: { value: string; label: string }[] = [];
-  models: any[] = [];
+  allModels: Model[] = []; // Tüm modeller
+  models: Model[] = []; // Filtrelenmiş modeller
   ayars: number[] = [];
   siras: number[] = [];
   goldPrice: GoldPrice | null = null;
@@ -39,6 +41,7 @@ export class CalculationComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private productService: ProductService,
+    private modelService: ModelService,
     private calculationService: CalculationService,
     private goldPriceService: GoldPriceService,
     private notificationService: NotificationService,
@@ -47,10 +50,9 @@ export class CalculationComponent implements OnInit, OnDestroy {
   ) {
     this.calculationForm = this.fb.group({
       productType: ['Kolye/Bilezik', Validators.required],
-      subType: ['', Validators.required],
       modelId: ['', Validators.required],
       ayar: ['', Validators.required],
-      sira: ['', Validators.required],
+      sira: [''], // Sadece Kolye/Bilezik için zorunlu
       uzunluk: ['']
     });
   }
@@ -58,7 +60,15 @@ export class CalculationComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadGoldPrice();
     this.loadCustomers();
-    this.onProductTypeChange();
+    
+    // Tüm modelleri yükle
+    this.modelService.models$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(models => {
+        this.allModels = models;
+        this.onProductTypeChange(); // Filtreyi uygula
+      });
+    
     this.calculationForm.get('productType')?.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => this.onProductTypeChange());
@@ -87,15 +97,27 @@ export class CalculationComponent implements OnInit, OnDestroy {
 
   onProductTypeChange(): void {
     const type = this.calculationForm.get('productType')?.value;
-    // Subtype options (dummy for now)
-    this.subTypeOptions = [
-      { value: 'standart', label: 'Standart' }
-    ];
-    // Models
-    this.models = this.productService.getProductsByType(type);
+    
+    // Modelleri productType'a göre filtrele
+    this.models = this.allModels.filter(m => m.productType === type);
+    
+    console.log('Product Type:', type);
+    console.log('Filtered Models:', this.models);
+    
     this.ayars = [];
     this.siras = [];
-    this.calculationForm.patchValue({ modelId: '', ayar: '', sira: '', uzunluk: '' });
+    
+    // Sıra validation'ı productType'a göre ayarla
+    const siraControl = this.calculationForm.get('sira');
+    if (type === 'Kolye/Bilezik') {
+      siraControl?.setValidators([Validators.required]);
+    } else {
+      siraControl?.clearValidators();
+      siraControl?.setValue('');
+    }
+    siraControl?.updateValueAndValidity();
+    
+    this.calculationForm.patchValue({ modelId: '', ayar: '', uzunluk: '' });
   }
 
   onModelChange(): void {
@@ -145,7 +167,7 @@ export class CalculationComponent implements OnInit, OnDestroy {
   }
 
   reset(): void {
-    this.calculationForm.reset({ productType: 'Kolye/Bilezik', subType: '', modelId: '', ayar: '', sira: '', uzunluk: '' });
+    this.calculationForm.reset({ productType: 'Kolye/Bilezik', modelId: '', ayar: '', sira: '', uzunluk: '' });
     this.result = null;
   }
 

@@ -4,19 +4,45 @@ import ddbDocClient, { TABLES } from '../config/dynamodb.js';
 
 export default {
   async create(userData) {
+    const timestamp = new Date().toISOString();
     const user = {
-      id: uuidv4(),
-      ...userData,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      id: `user-${uuidv4()}`,
+      username: userData.username,
+      email: userData.email,
+      password: userData.password,
+      fullName: userData.fullName || '',
+      role: userData.role || 'user',
+      isActive: userData.isActive !== undefined ? userData.isActive : true,
+      createdAt: timestamp,
+      updatedAt: timestamp
     };
 
-    await ddbDocClient.send(new PutCommand({
-      TableName: TABLES.USERS,
-      Item: user
-    }));
-
-    return user;
+    try {
+      console.log('Creating user in DynamoDB:', { username: user.username, role: user.role });
+      
+      await ddbDocClient.send(new PutCommand({
+        TableName: TABLES.USERS,
+        Item: user,
+        ConditionExpression: 'attribute_not_exists(id)'
+      }));
+      
+      console.log('User created successfully:', user.id);
+      
+      const { password, ...userWithoutPassword } = user;
+      return userWithoutPassword;
+    } catch (error) {
+      console.error('User.create error:', error);
+      
+      if (error.name === 'ResourceNotFoundException') {
+        throw new Error(`Users table (${TABLES.USERS}) does not exist. Run INIT-DATABASE.js first.`);
+      }
+      
+      if (error.name === 'ConditionalCheckFailedException') {
+        throw new Error('User ID already exists (UUID collision - very rare)');
+      }
+      
+      throw new Error(`Failed to create user: ${error.message}`);
+    }
   },
 
   async findById(id) {
@@ -29,16 +55,29 @@ export default {
   },
 
   async findByUsername(username) {
-    const result = await ddbDocClient.send(new QueryCommand({
-      TableName: TABLES.USERS,
-      IndexName: 'UsernameIndex',
-      KeyConditionExpression: 'username = :username',
-      ExpressionAttributeValues: {
-        ':username': username.toLowerCase()
-      }
-    }));
+    try {
+      console.log('Finding user by username:', username);
+      
+      const result = await ddbDocClient.send(new QueryCommand({
+        TableName: TABLES.USERS,
+        IndexName: 'UsernameIndex',
+        KeyConditionExpression: 'username = :username',
+        ExpressionAttributeValues: {
+          ':username': username.toLowerCase()
+        }
+      }));
 
-    return result.Items && result.Items.length > 0 ? result.Items[0] : null;
+      console.log('Query result:', result.Items?.length || 0, 'items found');
+      return result.Items && result.Items.length > 0 ? result.Items[0] : null;
+    } catch (error) {
+      console.error('User.findByUsername error:', error);
+      
+      if (error.name === 'ResourceNotFoundException') {
+        throw new Error(`Users table (${TABLES.USERS}) or UsernameIndex does not exist`);
+      }
+      
+      throw new Error(`Failed to find user: ${error.message}`);
+    }
   },
 
   async findAll() {
