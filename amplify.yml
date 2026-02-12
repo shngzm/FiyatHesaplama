@@ -7,6 +7,8 @@ frontend:
     build:
       commands:
         - npm run build
+        - echo "Build completed. Checking output..."
+        - ls -la dist/fiyat-hesaplama/browser/
   artifacts:
     baseDirectory: dist/fiyat-hesaplama/browser
     files:
@@ -14,3 +16,12 @@ frontend:
   cache:
     paths:
       - node_modules/**/*
+customHeaders:
+  - pattern: '**/*'
+    headers:
+      - key: 'Cache-Control'
+        value: 'no-cache'
+      - key: 'X-Frame-Options'
+        value: 'DENY'
+      - key: 'X-Content-Type-Options'
+        value: 'nosniff'
